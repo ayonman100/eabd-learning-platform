@@ -1,4 +1,4 @@
-﻿import "./Home.css";
+import "./Home.css";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -19,7 +19,6 @@ export default function Home() {
           loop
           playsInline
           preload="metadata"
-          poster="/images/home-hero-poster.jpg"
           aria-hidden="true"
         >
           <source
@@ -179,4 +178,3 @@ export default function Home() {
     </main>
   );
 }
-
