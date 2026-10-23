@@ -73,6 +73,15 @@ export default function Dashboard() {
                 Continue to pathway setup
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
+
+             <Link
+  className="dashboard-primary-link"
+  to={`/learning-journey?pathway=${encodeURIComponent(pathway.id)}`}
+>
+  Open learning journey
+  <ArrowRight size={18} aria-hidden="true" />
+</Link>
+
             </div>
           </article>
         ) : (

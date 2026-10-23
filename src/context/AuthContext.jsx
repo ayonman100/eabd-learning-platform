@@ -5,28 +5,51 @@ import {
   useEffect,
   useState,
 } from "react";
-import { supabase } from "../lib/supabase.js";
+import {
+  isSupabaseConfigured,
+  supabase,
+} from "../lib/supabase.js";
 
 const AuthContext = createContext(null);
 
+const CONFIGURATION_ERROR =
+  "Account services are unavailable because Supabase is not configured. Please try again later.";
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setSession(null);
+      setLoading(false);
+      return undefined;
+    }
+
     let mounted = true;
 
     async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
+      try {
+        const { data, error } = await supabase.auth.getSession();
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (error) {
-        console.error("Could not load the learner session:", error.message);
+        if (error) {
+          console.error(
+            "Could not load the learner session:",
+            error.message
+          );
+        }
+
+        setSession(data?.session ?? null);
+      } catch (error) {
+        if (mounted) {
+          console.error("Could not load the learner session:", error);
+          setSession(null);
+        }
+      } finally {
+        if (mounted) setLoading(false);
       }
-
-      setSession(data?.session ?? null);
-      setLoading(false);
     }
 
     loadSession();
@@ -46,27 +69,42 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  async function signUp({
-  name,
-  email,
-  password,
-  emailRedirectTo,
-}) {
-  return supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { full_name: name },
-      emailRedirectTo,
-    },
-  });
-}
+  async function signUp({ name, email, password, emailRedirectTo }) {
+    if (!isSupabaseConfigured || !supabase) {
+      return {
+        data: null,
+        error: new Error(CONFIGURATION_ERROR),
+      };
+    }
+
+    return supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name },
+        emailRedirectTo,
+      },
+    });
+  }
 
   async function signIn({ email, password }) {
+    if (!isSupabaseConfigured || !supabase) {
+      return {
+        data: null,
+        error: new Error(CONFIGURATION_ERROR),
+      };
+    }
+
     return supabase.auth.signInWithPassword({ email, password });
   }
 
   async function signOut() {
+    if (!isSupabaseConfigured || !supabase) {
+      return {
+        error: new Error(CONFIGURATION_ERROR),
+      };
+    }
+
     return supabase.auth.signOut();
   }
 
@@ -74,6 +112,7 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user ?? null,
     loading,
+    isSupabaseConfigured,
     signUp,
     signIn,
     signOut,

@@ -1,4 +1,4 @@
-﻿
+
 import { Link, Route, Routes } from "react-router-dom";
 import SiteHeader from "./components/SiteHeader.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -9,6 +9,7 @@ import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import LearningJourney from "./pages/LearningJourney.jsx";
 
 function NotFound() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
 
         {/* Learner onboarding */}
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/learning-journey" element={<LearningJourney />} />
 
         {/* Protected learner pages */}
         <Route element={<ProtectedRoute />}>

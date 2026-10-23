@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { learningPaths } from "../data/learningPaths.js";
 
@@ -17,6 +18,9 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +29,17 @@ export default function SignUp() {
     event.preventDefault();
     setError("");
     setMessage("");
+
+    if (password.length < 6) {
+      setError("Your password must contain at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Your passwords do not match. Please check them.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -75,6 +90,7 @@ export default function SignUp() {
         )}
 
         {message && <p role="status">{message}</p>}
+
         {error && (
           <p className="auth-error" role="alert">
             {error}
@@ -110,17 +126,73 @@ export default function SignUp() {
 
           <div className="auth-field">
             <label htmlFor="signup-password">Password</label>
-            <input
-              id="signup-password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              minLength={6}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-            <small>Use at least 6 characters.</small>
+            <div className="auth-password-control">
+              <input
+                id="signup-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                minLength={6}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                aria-describedby="signup-password-help"
+                required
+              />
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? (
+                  <EyeOff aria-hidden="true" size={20} />
+                ) : (
+                  <Eye aria-hidden="true" size={20} />
+                )}
+              </button>
+            </div>
+            <small id="signup-password-help">
+              Use at least 6 characters.
+            </small>
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="signup-confirm-password">
+              Confirm password
+            </label>
+            <div className="auth-password-control">
+              <input
+                id="signup-confirm-password"
+                name="confirmPassword"
+                type={showConfirmation ? "text" : "password"}
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(event) =>
+                  setConfirmPassword(event.target.value)
+                }
+                required
+              />
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() =>
+                  setShowConfirmation((visible) => !visible)
+                }
+                aria-label={
+                  showConfirmation
+                    ? "Hide password confirmation"
+                    : "Show password confirmation"
+                }
+                aria-pressed={showConfirmation}
+              >
+                {showConfirmation ? (
+                  <EyeOff aria-hidden="true" size={20} />
+                ) : (
+                  <Eye aria-hidden="true" size={20} />
+                )}
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={submitting}>
