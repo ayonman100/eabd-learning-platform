@@ -1,4 +1,4 @@
-﻿
+
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
@@ -23,7 +23,7 @@ import "./Navbar.css";
 const DEFAULT_SETTINGS = {
   darkMode: false,
   highContrast: false,
-  largeText: false,
+  textSize: "normal",
   extraSpacing: false,
   reducedMotion: false,
   readingRate: 0.8,
@@ -57,7 +57,8 @@ export default function SiteHeader() {
 
   root.dataset.theme = settings.darkMode ? "dark" : "light";
   root.classList.toggle("a11y-high-contrast", settings.highContrast);
-  root.classList.toggle("a11y-large-text", settings.largeText);
+  root.classList.toggle("a11y-text-large", settings.textSize === "large");
+  root.classList.toggle("a11y-text-larger", settings.textSize === "larger");
   root.classList.toggle("a11y-extra-spacing", settings.extraSpacing);
   root.classList.toggle("a11y-reduced-motion", settings.reducedMotion);
 
@@ -88,8 +89,55 @@ export default function SiteHeader() {
     setPaused(false);
   }
 
+  function startReading(text, rate) {
+    const utterance = new window.SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoices = voices.filter((voice) =>
+      /^en([_-]|$)/i.test(voice.lang)
+    );
+
+    const voice =
+      englishVoices.find((item) => /^en[-_]NG$/i.test(item.lang)) ||
+      englishVoices.find((item) => /^en[-_]GB$/i.test(item.lang)) ||
+      englishVoices.find((item) => /^en[-_]US$/i.test(item.lang)) ||
+      englishVoices[0];
+
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    } else {
+      utterance.lang = "en-NG";
+    }
+
+    utterance.rate = rate;
+    utterance.onend = () => {
+      if (utteranceRef.current !== utterance) return;
+      utteranceRef.current = null;
+      setSpeaking(false);
+      setPaused(false);
+    };
+    utterance.onerror = (event) => {
+      if (utteranceRef.current !== utterance) return;
+      utteranceRef.current = null;
+      setSpeaking(false);
+      setPaused(false);
+
+      if (event.error && !["canceled", "interrupted"].includes(event.error)) {
+        window.alert("Read Aloud could not start. Check your browser sound settings and try again.");
+      }
+    };
+
+    utteranceRef.current = utterance;
+    setSpeaking(true);
+    setPaused(false);
+    window.speechSynthesis.speak(utterance);
+  }
+
   function toggleReading() {
-    if (!("speechSynthesis" in window)) {
+    if (
+      !("speechSynthesis" in window) ||
+      typeof window.SpeechSynthesisUtterance === "undefined"
+    ) {
       window.alert("Read Aloud is not supported by this browser.");
       return;
     }
@@ -99,36 +147,27 @@ export default function SiteHeader() {
       return;
     }
 
-    const main = document.querySelector("main");
-    const text = main?.innerText?.trim();
-
+    const text = document.querySelector("main")?.innerText?.trim();
     if (!text) {
       window.alert("There is no page content available to read.");
       return;
     }
 
     window.speechSynthesis.cancel();
+    startReading(text, settings.readingRate);
+  }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-NG";
-    utterance.rate = settings.readingRate;
+  function changeReadingRate(value) {
+    const rate = Number(value);
+    updateSetting("readingRate", rate);
 
-    utterance.onend = () => {
-      setSpeaking(false);
-      setPaused(false);
-      utteranceRef.current = null;
-    };
+    if (!speaking || !("speechSynthesis" in window)) return;
 
-    utterance.onerror = () => {
-      setSpeaking(false);
-      setPaused(false);
-      utteranceRef.current = null;
-    };
+    const text = document.querySelector("main")?.innerText?.trim();
+    if (!text) return;
 
-    utteranceRef.current = utterance;
-    setSpeaking(true);
-    setPaused(false);
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.cancel();
+    startReading(text, rate);
   }
 
   function togglePause() {
@@ -242,15 +281,26 @@ export default function SiteHeader() {
 
           <p className="accessibility-section-label">Display and readability</p>
 
-          <button
-            type="button"
-            className="accessibility-option"
-            aria-pressed={settings.largeText}
-            onClick={() => updateSetting("largeText", !settings.largeText)}
-          >
-            <Type size={20} aria-hidden="true" />
-            <span>{settings.largeText ? "Use standard text size" : "Increase page text"}</span>
-          </button>
+          <div className="text-size-control">
+            <span className="text-size-heading">Text size</span>
+            <div className="text-size-options" role="group" aria-label="Page text size">
+              {[
+                { value: "normal", label: "Normal" },
+                { value: "large", label: "Large" },
+                { value: "larger", label: "Larger" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className="text-size-button"
+                  aria-pressed={settings.textSize === option.value}
+                  onClick={() => updateSetting("textSize", option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <button
             type="button"
@@ -278,7 +328,7 @@ export default function SiteHeader() {
             aria-pressed={settings.reducedMotion}
             onClick={() => updateSetting("reducedMotion", !settings.reducedMotion)}
           >
-            <span aria-hidden="true">◌</span>
+            <RotateCcw size={20} aria-hidden="true" />
             <span>{settings.reducedMotion ? "Allow normal motion" : "Reduce animations"}</span>
           </button>
 
@@ -313,7 +363,7 @@ export default function SiteHeader() {
           </div>
 
           <label className="reading-speed-control" htmlFor="reading-rate">
-            Reading speed: {settings.readingRate.toFixed(1)}×
+            Reading speed: {settings.readingRate.toFixed(1)}�
             <input
               id="reading-rate"
               type="range"
@@ -321,16 +371,14 @@ export default function SiteHeader() {
               max="1.5"
               step="0.1"
               value={settings.readingRate}
-              onChange={(event) =>
-                updateSetting("readingRate", Number(event.target.value))
-              }
+              onChange={(event) => changeReadingRate(event.target.value)}
             />
             <span className="reading-speed-labels">
               <span>Slower</span>
               <span>Faster</span>
             </span>
             <span className="accessibility-help">
-              The selected speed applies when you start reading.
+              Changing speed during playback restarts the page at the selected speed.
             </span>
           </label>
 

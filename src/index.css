@@ -126,12 +126,24 @@ a {
 }
 
 /* Accessibility: text size */
-:root.a11y-large-text {
-  font-size: 120%;
+:root.a11y-text-large {
+  font-size: 112.5%;
+}
+
+:root.a11y-text-larger {
+  font-size: 125%;
 }
 
 /* Accessibility: comfortable text spacing */
 :root.a11y-extra-spacing body {
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+}
+
+:root.a11y-extra-spacing main p,
+:root.a11y-extra-spacing main li,
+:root.a11y-extra-spacing main label {
   line-height: 1.9;
   letter-spacing: 0.04em;
   word-spacing: 0.12em;
