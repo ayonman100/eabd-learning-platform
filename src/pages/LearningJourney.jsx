@@ -1,123 +1,175 @@
-
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Circle,
-  Flag,
+  Clock,
   LockKeyhole,
   ShieldAlert,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
-import { learningPaths } from "../data/learningPaths.js";
+import { useLearner } from "../context/LearnerContext.jsx";
+import { getPathwayOrFirst } from "../data/learningPaths.js";
+import { listTaskProgress, startTask, submitTask } from "../lib/db/progress.js";
+import { latestReviewByTask, listReviews } from "../lib/db/reviews.js";
 import {
-  clearTaskReview,
-  flagTaskForReview,
   getProgressSummary,
   getWeekStatus,
-  loadProgress,
-  saveProgress,
-  updateTaskCompletion,
+  getNextTask,
 } from "../utils/progress.js";
+import ReviewFeedbackCard from "../components/ui/ReviewFeedbackCard.jsx";
+import { ErrorMessage, StatusMessage } from "../components/ui/StatusBanner.jsx";
+
+const WEEK_STATUS_LABELS = {
+  available: "Available",
+  complete: "Week complete",
+  locked: "Locked",
+  review: "With your supervisor",
+};
 
 export default function LearningJourney() {
-  const { user } = useAuth();
+  const { learner, loading: learnerLoading } = useLearner();
   const [searchParams] = useSearchParams();
+  const pathway = getPathwayOrFirst(searchParams.get("pathway"));
 
-  const requestedPathway = searchParams.get("pathway");
-  const pathway =
-    learningPaths.find((item) => item.id === requestedPathway) ||
-    learningPaths[0];
-
-  const learnerId = user?.id;
-
-  const [progress, setProgress] = useState(() =>
-    loadProgress(learnerId, pathway)
-  );
-  const [notice, setNotice] = useState("");
+  const [rows, setRows] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [busyTask, setBusyTask] = useState("");
+  const [returnedFromCanva, setReturnedFromCanva] = useState("");
 
-  function persistProgress(nextProgress) {
+  const learnerId = learner?.id ?? null;
+
+  const load = useCallback(async () => {
+    if (!learnerId) return;
+    const [nextRows, nextReviews] = await Promise.all([
+      listTaskProgress(learnerId, pathway.id),
+      listReviews(learnerId, pathway.id),
+    ]);
+    setRows(nextRows);
+    setReviews(nextReviews);
+    setLoaded(true);
+  }, [learnerId, pathway.id]);
+
+  useEffect(() => {
+    if (learnerLoading) return undefined;
+    if (!learnerId) return undefined;
+
+    let active = true;
+
+    load().catch((loadError) => {
+      if (active) {
+        setError(loadError.message);
+        setLoaded(true);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [learnerLoading, learnerId, load]);
+
+  // Coming back from Canva is the moment to offer the submit form.
+  useEffect(() => {
+    function handleFocus() {
+      if (document.visibilityState !== "visible") return;
+      setReturnedFromCanva((current) => current || pendingTaskId());
+    }
+
+    function pendingTaskId() {
+      try {
+        return window.sessionStorage.getItem("eabd-pending-task") ?? "";
+      } catch {
+        return "";
+      }
+    }
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
+
+  const summary = getProgressSummary(pathway, rows);
+  const next = getNextTask(pathway, rows);
+  const latestReview = latestReviewByTask(reviews);
+
+  async function handleStart(task) {
     setError("");
+    setNotice("");
+    setBusyTask(task.id);
 
-    if (!learnerId) {
-      setError("Sign in to save progress for your learner account.");
-      return false;
+    try {
+      const saved = await startTask(learnerId, pathway.id, task.id);
+      setRows((current) => {
+        const without = current.filter((row) => row.task_id !== task.id);
+        return [...without, saved];
+      });
+
+      try {
+        window.sessionStorage.setItem("eabd-pending-task", task.id);
+      } catch {
+        // Session storage is a nicety, not a requirement.
+      }
+
+      window.open(task.canvaUrl, "_blank", "noopener,noreferrer");
+      setNotice("Canva opened in a new tab. Come back when you are ready.");
+    } catch (startError) {
+      setError(startError.message);
+    } finally {
+      setBusyTask("");
     }
-
-    const result = saveProgress(learnerId, pathway, nextProgress);
-
-    if (!result.ok) {
-      setError(result.error);
-      return false;
-    }
-
-    setProgress(result.progress);
-    return true;
   }
 
-  function handleTaskChange(taskId, completed) {
+  async function handleSubmit(task, designLink, note) {
+    setError("");
     setNotice("");
+    setBusyTask(task.id);
 
-    const result = updateTaskCompletion(
-      pathway,
-      progress,
-      taskId,
-      completed
+    try {
+      const saved = await submitTask(learnerId, pathway.id, task.id, {
+        designLink,
+        note,
+      });
+      setRows((current) => {
+        const without = current.filter((row) => row.task_id !== task.id);
+        return [...without, saved];
+      });
+      setReturnedFromCanva("");
+      try {
+        window.sessionStorage.removeItem("eabd-pending-task");
+      } catch {
+        // Ignore storage failures.
+      }
+      setNotice("Sent to your supervisor. You can carry on with the next step.");
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setBusyTask("");
+    }
+  }
+
+  if (learnerLoading || !loaded) {
+    return (
+      <main id="main-content" className="learning-page" aria-live="polite">
+        <p>Loading your journey...</p>
+      </main>
     );
-
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
-    if (persistProgress(result.progress)) {
-      setNotice("Your task progress has been saved in this browser.");
-    }
   }
 
-  function handleFlagForReview(taskId) {
-    setNotice("");
-
-    const result = flagTaskForReview(
-      pathway,
-      progress,
-      taskId,
-      "Learner has requested a review of this step."
+  if (!learner) {
+    return (
+      <main id="main-content" className="learning-page">
+        <p role="status" className="status-message">
+          Finish setting up your record before starting the pathway.
+        </p>
+        <p>
+          <Link to="/onboarding">Continue setting up</Link>
+        </p>
+      </main>
     );
-
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
-    if (persistProgress(result.progress)) {
-      setNotice(
-        "Review requested. Later weeks remain locked until this review is cleared."
-      );
-    }
   }
-
-  function handleDemoReviewClear(taskId) {
-    setNotice("");
-
-    const result = clearTaskReview(pathway, progress, taskId);
-
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
-    if (persistProgress(result.progress)) {
-      setNotice(
-        "Demo review cleared. This simulates reviewer approval and is not a secure reviewer workflow."
-      );
-    }
-  }
-
-  const summary = getProgressSummary(pathway, progress);
 
   return (
     <main id="main-content" className="learning-page" tabIndex="-1">
@@ -132,8 +184,9 @@ export default function LearningJourney() {
           <h1>{pathway.title}</h1>
           <p>{pathway.description}</p>
           <p>
-            Work through each week at a pace that suits you. If a task needs
-            review, the next week stays locked until the review is cleared.
+            Each step opens in Canva. When you are ready, send it to your
+            supervisor, who marks it done or asks for another try. The next week
+            opens once every step in this one is sent or reviewed.
           </p>
         </header>
 
@@ -151,61 +204,52 @@ export default function LearningJourney() {
 
           <progress
             className="learning-progress-bar"
-            value={summary.completedCount}
+            value={summary.doneCount}
             max={summary.totalTasks || 1}
-            aria-label={`${summary.completedCount} of ${summary.totalTasks} tasks completed`}
+            aria-label={`${summary.doneCount} of ${summary.totalTasks} steps done`}
           />
 
           <p className="learning-progress-count">
-            {summary.completedCount} of {summary.totalTasks} tasks completed
+            {summary.doneCount} of {summary.totalTasks} steps done
             {" · "}
-            {summary.remainingCount} remaining
+            {summary.reviewedCount} reviewed by your supervisor
+            {" · "}
+            {summary.remainingCount} left
           </p>
+
+          {next && (
+            <p className="learning-next">
+              Next step: <strong>{next.task.title}</strong>
+            </p>
+          )}
         </section>
 
-        <p className="learning-storage-note">
-          Demo storage: progress is saved in this browser for your signed-in
-          learner ID. It is not yet synchronised to Supabase.
-        </p>
+        <StatusMessage>{notice}</StatusMessage>
+        <ErrorMessage>{error}</ErrorMessage>
 
-        {notice && (
-          <p className="learning-notice" role="status">
-            {notice}
-          </p>
+        {returnedFromCanva && (
+          <SubmitPanel
+            task={findTask(pathway, returnedFromCanva)}
+            busy={busyTask === returnedFromCanva}
+            onSubmit={handleSubmit}
+            onDismiss={() => setReturnedFromCanva("")}
+          />
         )}
 
-        {error && (
-          <p className="learning-error" role="alert">
-            {error}
-          </p>
-        )}
-
-        <section
-          className="learning-weeks"
-          aria-label="Four-week learning pathway"
-        >
+        <section className="learning-weeks" aria-label="Learning pathway weeks">
           {pathway.weeks.map((week, weekIndex) => {
-            const status = getWeekStatus(pathway, progress, weekIndex);
+            const status = getWeekStatus(pathway, rows, weekIndex);
             const locked = status === "locked";
-
-            const statusLabel = {
-              available: "Available",
-              complete: "Week complete",
-              locked: "Locked",
-              review: "Review pending",
-            }[status];
 
             return (
               <article
-                className={`learning-week learning-week-${status}`}
                 key={week.id}
+                className={`learning-week learning-week-${status}`}
                 aria-labelledby={`${week.id}-heading`}
               >
                 <div className="learning-week-header">
                   <div>
-                    <p className="learning-eyebrow">
-                      WEEK {weekIndex + 1}
-                    </p>
+                    <p className="learning-eyebrow">WEEK {weekIndex + 1}</p>
                     <h2 id={`${week.id}-heading`}>{week.title}</h2>
                     <p>{week.objective}</p>
                   </div>
@@ -216,96 +260,85 @@ export default function LearningJourney() {
                       <CheckCircle2 size={15} aria-hidden="true" />
                     )}
                     {status === "review" && (
-                      <ShieldAlert size={15} aria-hidden="true" />
+                      <Clock size={15} aria-hidden="true" />
                     )}
-                    {statusLabel}
+                    {WEEK_STATUS_LABELS[status]}
                   </span>
                 </div>
 
                 {locked && (
                   <p className="learning-locked-message">
-                    Complete the previous week and resolve any pending reviews
-                    to unlock these tasks.
+                    Send every step in the previous week before this week opens.
                   </p>
                 )}
 
-                <div className="learning-task-list">
+                <ul className="learning-task-list">
                   {week.tasks.map((task) => {
-                    const completed = progress.completedTasks.includes(task.id);
-                    const review = progress.reviewFlags[task.id];
-                    const pendingReview = review?.status === "pending";
+                    const row = rows.find((item) => item.task_id === task.id);
+                    const taskStatus = row?.status ?? "not-started";
+                    const review = latestReview.get(task.id);
 
                     return (
-                      <div className="learning-task" key={task.id}>
-                        <label className="learning-task-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={completed}
-                            disabled={locked || pendingReview || !learnerId}
-                            onChange={(event) =>
-                              handleTaskChange(task.id, event.target.checked)
-                            }
-                          />
-
+                      <li className="learning-task" key={task.id}>
+                        <div className="learning-task-head">
                           <span className="learning-task-icon" aria-hidden="true">
-                            {completed ? (
+                            {taskStatus === "reviewed" ? (
                               <CheckCircle2 size={22} />
+                            ) : taskStatus === "submitted" ? (
+                              <Clock size={22} />
+                            ) : taskStatus === "started" ? (
+                              <ShieldAlert size={22} />
                             ) : (
                               <Circle size={22} />
                             )}
                           </span>
 
-                          <span className="learning-task-copy">
+                          <div className="learning-task-copy">
                             <strong>{task.title}</strong>
                             <span>{task.description}</span>
-                          </span>
-                        </label>
+                            <span className="learning-task-status">
+                              {statusLabel(taskStatus)}
+                            </span>
+                          </div>
+                        </div>
 
-                        {pendingReview && (
-                          <div className="learning-review-notice">
-                            <ShieldAlert size={18} aria-hidden="true" />
-                            <div>
-                              <strong>Awaiting review</strong>
-                              <p>
-                                This step needs review before the next week
-                                can unlock.
-                              </p>
-                            </div>
-
+                        {!locked && (
+                          <div className="learning-task-actions">
                             <button
-                              className="learning-demo-review-button"
                               type="button"
-                              onClick={() => handleDemoReviewClear(task.id)}
+                              className="learning-flag-button"
+                              onClick={() => handleStart(task)}
+                              disabled={busyTask === task.id || taskStatus === "submitted"}
                             >
-                              Simulate reviewer approval
+                              Start in Canva
+                              <ArrowRight size={16} aria-hidden="true" />
                             </button>
-                            <small>
-                              Demo only. This button is not a secure reviewer
-                              permission system.
-                            </small>
+
+                            <SubmitPanel
+                              task={task}
+                              busy={busyTask === task.id}
+                              onSubmit={handleSubmit}
+                              inline
+                              disabled={taskStatus === "submitted"}
+                            />
                           </div>
                         )}
 
-                        {!pendingReview && !locked && (
-                          <button
-                            className="learning-flag-button"
-                            type="button"
-                            onClick={() => handleFlagForReview(task.id)}
-                            aria-label={`Flag ${task.title} for review`}
-                          >
-                            <Flag size={16} aria-hidden="true" />
-                            Flag for review
-                          </button>
+                        {review && (
+                          <ReviewFeedbackCard
+                            review={review}
+                            heading={`Feedback for ${task.title}`}
+                          />
                         )}
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
 
                 {status === "complete" && (
                   <p className="learning-week-complete">
                     <CheckCircle2 size={18} aria-hidden="true" />
-                    All tasks in this week are complete.
+                    Every step this week is reviewed.
                   </p>
                 )}
               </article>
@@ -316,7 +349,7 @@ export default function LearningJourney() {
         <footer className="learning-footer">
           <p>
             The goal is meaningful progress, not speed. Ask for the support or
-            access adjustments that help you participate.
+            access adjustments that help you take part.
           </p>
           <Link to="/account">
             View learner account
@@ -325,5 +358,103 @@ export default function LearningJourney() {
         </footer>
       </div>
     </main>
+  );
+}
+
+function statusLabel(status) {
+  if (status === "reviewed") return "Reviewed";
+  if (status === "submitted") return "With your supervisor";
+  if (status === "started") return "Started";
+  return "Not started";
+}
+
+function findTask(pathway, taskId) {
+  for (const week of pathway.weeks) {
+    const task = week.tasks.find((candidate) => candidate.id === taskId);
+    if (task) return task;
+  }
+  return null;
+}
+
+/**
+ * The submit form, used both in the "Back from Canva?" panel and inline on each
+ * task, so the design link and note fields are written once.
+ */
+function SubmitPanel({
+  task,
+  busy,
+  onSubmit,
+  onDismiss,
+  inline = false,
+  disabled = false,
+}) {
+  const [open, setOpen] = useState(inline ? false : true);
+  const [designLink, setDesignLink] = useState("");
+  const [note, setNote] = useState("");
+
+  if (!task) return null;
+
+  if (!open && inline) {
+    return (
+      <button
+        type="button"
+        className="button-quiet"
+        onClick={() => setOpen(true)}
+        disabled={disabled}
+      >
+        Send for review
+      </button>
+    );
+  }
+
+  return (
+    <form
+      className={inline ? "submit-panel submit-panel-inline" : "submit-panel"}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(task, designLink, note);
+      }}
+    >
+      <h3>{inline ? "Send this step for review" : "Back from Canva?"}</h3>
+      <p className="auth-help">
+        Add a link to your design if you have one, and anything you want your
+        supervisor to know.
+      </p>
+
+      <div className="auth-field">
+        <label htmlFor={`design-link-${task.id}`}>
+          Link to your design (optional)
+        </label>
+        <input
+          id={`design-link-${task.id}`}
+          type="url"
+          inputMode="url"
+          placeholder="https://www.canva.com/design/..."
+          value={designLink}
+          onChange={(event) => setDesignLink(event.target.value)}
+        />
+      </div>
+
+      <div className="auth-field">
+        <label htmlFor={`note-${task.id}`}>Note for your supervisor (optional)</label>
+        <textarea
+          id={`note-${task.id}`}
+          rows={2}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+        />
+      </div>
+
+      <div className="onboarding-actions">
+        {onDismiss && (
+          <button type="button" className="button-quiet" onClick={onDismiss}>
+            Not yet
+          </button>
+        )}
+        <button type="submit" disabled={busy}>
+          {busy ? "Sending..." : "Send for review"}
+        </button>
+      </div>
+    </form>
   );
 }

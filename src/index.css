@@ -862,3 +862,854 @@ a {
     margin-left: 2.2rem;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Onboarding flow
+   --------------------------------------------------------------------------- */
+
+.onboarding-page {
+  min-height: calc(100vh - 5rem);
+  padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+  background: var(--color-background);
+}
+
+.onboarding-inner {
+  width: min(100%, 52rem);
+  margin-inline: auto;
+}
+
+.onboarding-loading {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.onboarding-progress {
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-progress ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.86rem;
+  color: var(--color-muted);
+}
+
+.onboarding-progress li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.onboarding-step-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.onboarding-progress li.is-done {
+  color: var(--color-secondary);
+}
+
+.onboarding-progress li.is-done .onboarding-step-dot {
+  background: currentColor;
+}
+
+.onboarding-progress li.is-current {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.onboarding-progress li.is-current .onboarding-step-dot {
+  background: currentColor;
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.onboarding-counter {
+  margin: 0.75rem 0 0;
+  font-size: 0.86rem;
+  color: var(--color-muted);
+}
+
+.onboarding-card h1:focus {
+  outline: none;
+}
+
+.onboarding-card h1:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.onboarding-card form {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.5rem;
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.onboarding-card .button-quiet {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.onboarding-card .button-quiet:hover:not(:disabled) {
+  background: var(--color-hover);
+}
+
+.onboarding-leave {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+}
+
+/* Field groups shared by onboarding and profile */
+.field-group {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field-group legend {
+  padding: 0;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.field-hint {
+  margin: 0 0 0.3rem;
+  color: var(--color-muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.consent-option {
+  align-items: flex-start;
+}
+
+.toggle-option {
+  align-items: center;
+}
+
+/* Segmented button groups used by the display settings */
+.segmented-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.segmented-option {
+  min-height: 44px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented-option:hover:not(:disabled) {
+  background: var(--color-hover);
+}
+
+.segmented-option[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.display-settings {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Document step */
+.document-drop {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px dashed var(--color-border);
+  border-radius: 0.85rem;
+  background: var(--color-surface);
+}
+
+.document-drop label {
+  font-weight: 700;
+}
+
+.document-drop input[type="file"] {
+  min-height: 44px;
+  padding: 0.5rem 0;
+  color: var(--color-text);
+}
+
+/* Confirm step */
+.confirm-list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confirm-item {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.85rem;
+  background: var(--color-surface);
+}
+
+.confirm-value {
+  margin: 0.4rem 0;
+}
+
+.confirm-evidence {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0 0.6rem 0.9rem;
+  border-left: 3px solid var(--color-secondary);
+  color: var(--color-muted);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility: target sizes and spacing
+   --------------------------------------------------------------------------- */
+
+:root.a11y-targets-large button,
+:root.a11y-targets-large a,
+:root.a11y-targets-large input,
+:root.a11y-targets-large select,
+:root.a11y-targets-large textarea,
+:root.a11y-targets-large label.onboarding-option {
+  min-height: 64px;
+}
+
+:root.a11y-targets-large button,
+:root.a11y-targets-large .auth-password-toggle,
+:root.a11y-targets-large .segmented-option {
+  min-width: 64px;
+  padding: 0.85rem 1.1rem;
+}
+
+:root.a11y-targets-xl button,
+:root.a11y-targets-xl a,
+:root.a11y-targets-xl input,
+:root.a11y-targets-xl select,
+:root.a11y-targets-xl textarea,
+:root.a11y-targets-xl label.onboarding-option {
+  min-height: 88px;
+}
+
+:root.a11y-targets-xl button,
+:root.a11y-targets-xl .auth-password-toggle,
+:root.a11y-targets-xl .segmented-option {
+  min-width: 88px;
+  padding: 1rem 1.35rem;
+  font-size: 1.05rem;
+}
+
+:root.a11y-targets-large .onboarding-option,
+:root.a11y-targets-xl .onboarding-option {
+  gap: 1rem;
+}
+
+:root.a11y-targets-large .onboarding-option input,
+:root.a11y-targets-xl .onboarding-option input {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+@media (forced-colors: active) {
+  .onboarding-progress li.is-current .onboarding-step-dot,
+  .segmented-option[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Dashboard, profile, supervisor, and review surfaces
+   --------------------------------------------------------------------------- */
+
+.dashboard-page,
+.profile-page,
+.supervisor-page {
+  min-height: 70vh;
+  padding: clamp(1.5rem, 4vw, 3.5rem) 1rem;
+  background: var(--color-background);
+}
+
+.dashboard-inner,
+.profile-inner,
+.supervisor-inner {
+  width: min(100%, 62rem);
+  margin-inline: auto;
+}
+
+.dashboard-welcome,
+.dashboard-intro,
+.profile-intro,
+.supervisor-intro {
+  margin-bottom: 2rem;
+}
+
+.dashboard-welcome h1,
+.profile-intro h1,
+.supervisor-intro h1 {
+  margin: 0.4rem 0 1rem;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  line-height: 1.15;
+}
+
+.dashboard-eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--color-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dashboard-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.dashboard-section {
+  margin-top: 2.25rem;
+}
+
+.dashboard-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-section h2 {
+  margin: 0.3rem 0;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+}
+
+.dashboard-percentage {
+  font-size: 1.6rem;
+  color: var(--color-secondary);
+}
+
+.dashboard-pathway-card,
+.dashboard-empty-card,
+.dashboard-next-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.6rem);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.dashboard-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: 0.85rem;
+  background: var(--color-hover);
+  color: var(--color-secondary);
+}
+
+.dashboard-pathway-content {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.dashboard-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-secondary);
+  border-radius: 999px;
+  color: var(--color-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dashboard-next-step {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.dashboard-primary-link,
+.dashboard-account-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+.dashboard-primary-link {
+  width: fit-content;
+  padding: 0.6rem 0.95rem;
+  border-radius: 0.65rem;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  text-decoration: none;
+}
+
+.dashboard-primary-link:hover {
+  opacity: 0.92;
+}
+
+.dashboard-next-card {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dashboard-next-card h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+}
+
+.dashboard-feedback {
+  margin-top: 1.25rem;
+}
+
+.dashboard-feedback h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+}
+
+.dashboard-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dashboard-step {
+  padding: 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+}
+
+.dashboard-step-number {
+  color: var(--color-secondary);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+.dashboard-step h3 {
+  margin: 0.4rem 0;
+  font-size: 1.05rem;
+}
+
+.dashboard-step p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.dashboard-support {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-hover);
+}
+
+.dashboard-support-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-secondary);
+}
+
+.dashboard-support h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+.dashboard-support p {
+  margin: 0 0 0.6rem;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+/* Profile sections */
+.profile-section {
+  margin-top: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.6rem);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.profile-section-heading h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+}
+
+.profile-section-heading p {
+  margin: 0 0 1rem;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.profile-section form {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-section-actions button {
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-section-actions button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.profile-section-actions .status-message {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.profile-back {
+  margin-top: 2rem;
+}
+
+/* Read-only summaries */
+.person-room-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.person-room-summary h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.summary-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.summary-list > div {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-list dt {
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.summary-list dd {
+  margin: 0.15rem 0 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+/* Supervisor pages */
+.supervisor-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supervisor-list a {
+  display: grid;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+  text-decoration: none;
+}
+
+.supervisor-list a:hover {
+  background: var(--color-hover);
+}
+
+.supervisor-list span {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.supervisor-task {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.supervisor-task h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.supervisor-note {
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--color-secondary);
+  background: var(--color-hover);
+  line-height: 1.6;
+}
+
+.supervisor-prompt {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.supervisor-review-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+}
+
+.supervisor-review-form button[type="submit"] {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Review feedback, shared by dashboard, journey, and supervisor */
+.review-feedback {
+  margin-top: 0.85rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--color-success-border);
+  border-left-width: 4px;
+  border-radius: 0.75rem;
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.review-feedback-retry {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-surface);
+  color: var(--color-warning-text);
+}
+
+.review-feedback-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.review-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.review-rating-text {
+  font-size: 0.82rem;
+  letter-spacing: normal;
+}
+
+.review-feedback-text {
+  margin: 0.6rem 0 0;
+  line-height: 1.6;
+}
+
+.review-feedback-access {
+  margin: 0.6rem 0 0;
+  line-height: 1.6;
+}
+
+.review-feedback-date {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
+/* Journey additions */
+.learning-task-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.learning-task-status {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.learning-task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-left: 3.2rem;
+}
+
+.learning-next {
+  margin: 0.6rem 0 0;
+  color: var(--color-muted);
+}
+
+.submit-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+}
+
+.submit-panel h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.submit-panel-inline {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.submit-panel .onboarding-actions {
+  margin-top: 0;
+}
+
+/* 404 */
+.not-found-page {
+  display: grid;
+  gap: 1rem;
+  place-content: center;
+  min-height: 60vh;
+  padding: 3rem 1.25rem;
+  text-align: center;
+}
+
+.not-found-eyebrow {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.not-found-page h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.not-found-primary,
+.not-found-secondary {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border-radius: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.not-found-primary {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.not-found-secondary {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+@media (max-width: 38rem) {
+  .learning-task-actions {
+    margin-left: 0;
+  }
+
+  .dashboard-pathway-card,
+  .dashboard-empty-card {
+    flex-direction: column;
+  }
+}

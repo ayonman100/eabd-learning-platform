@@ -1,245 +1,109 @@
+/**
+ * Progress rules over database rows.
+ *
+ * Every function here is pure: it takes the pathway definition from
+ * src/data/learningPaths.js and the task_progress rows from Supabase, and
+ * returns a value. Nothing reads or writes browser storage.
+ *
+ * Status meanings, from the database check constraint:
+ *   started    the learner has opened the step
+ *   submitted  the learner has sent the step for review
+ *   reviewed   a supervisor marked it done
+ *
+ * A step sent back by a review returns to started, which locks the next week
+ * again until the learner resubmits.
+ */
 
-const STORAGE_PREFIX = "eabd-learning-progress-v1";
+const DONE_STATUSES = new Set(["submitted", "reviewed"]);
 
-function getStorageKey(userId, pathwayId) {
-  return `${STORAGE_PREFIX}:${userId}:${pathwayId}`;
+function tasksOf(pathway) {
+  if (!pathway?.weeks) return [];
+  return pathway.weeks.flatMap((week) => week.tasks ?? []);
 }
 
-function createEmptyProgress(pathway) {
-  return {
-    pathwayId: pathway.id,
-    completedTasks: [],
-    reviewFlags: {},
-    updatedAt: new Date().toISOString(),
-  };
+function statusByTask(rows) {
+  const map = new Map();
+  for (const row of rows ?? []) {
+    map.set(row.task_id, row.status);
+  }
+  return map;
 }
 
-function sanitizeProgress(saved, pathway) {
-  const validTaskIds = new Set(
-    pathway.weeks.flatMap((week) => week.tasks.map((task) => task.id))
-  );
+export function getProgressSummary(pathway, rows) {
+  const tasks = tasksOf(pathway);
+  const statuses = statusByTask(rows);
 
-  const completedTasks = Array.isArray(saved?.completedTasks)
-    ? [...new Set(saved.completedTasks.filter((id) => validTaskIds.has(id)))]
-    : [];
+  let submittedCount = 0;
+  let reviewedCount = 0;
 
-  const reviewFlags = {};
-
-  if (saved?.reviewFlags && typeof saved.reviewFlags === "object") {
-    for (const [taskId, flag] of Object.entries(saved.reviewFlags)) {
-      if (
-        validTaskIds.has(taskId) &&
-        flag &&
-        typeof flag === "object" &&
-        ["pending", "cleared"].includes(flag.status)
-      ) {
-        reviewFlags[taskId] = {
-          status: flag.status,
-          note: typeof flag.note === "string" ? flag.note : "",
-        };
-      }
-    }
+  for (const task of tasks) {
+    const status = statuses.get(task.id);
+    if (status === "submitted") submittedCount += 1;
+    if (status === "reviewed") reviewedCount += 1;
   }
 
-  return {
-    pathwayId: pathway.id,
-    completedTasks,
-    reviewFlags,
-    updatedAt:
-      typeof saved?.updatedAt === "string"
-        ? saved.updatedAt
-        : new Date().toISOString(),
-  };
-}
-
-export function loadProgress(userId, pathway) {
-  if (!userId || !pathway?.id || !Array.isArray(pathway.weeks)) {
-    return createEmptyProgress(pathway);
-  }
-
-  try {
-    const raw = localStorage.getItem(getStorageKey(userId, pathway.id));
-
-    if (!raw) return createEmptyProgress(pathway);
-
-    return sanitizeProgress(JSON.parse(raw), pathway);
-  } catch {
-    return createEmptyProgress(pathway);
-  }
-}
-
-export function saveProgress(userId, pathway, progress) {
-  if (!userId || !pathway?.id) {
-    return {
-      ok: false,
-      error: "A learner and learning pathway are required.",
-    };
-  }
-
-  try {
-    const safeProgress = sanitizeProgress(progress, pathway);
-
-    safeProgress.updatedAt = new Date().toISOString();
-
-    localStorage.setItem(
-      getStorageKey(userId, pathway.id),
-      JSON.stringify(safeProgress)
-    );
-
-    return { ok: true, progress: safeProgress };
-  } catch {
-    return {
-      ok: false,
-      error: "Progress could not be saved in this browser.",
-    };
-  }
-}
-
-export function getProgressSummary(pathway, progress) {
-  const tasks = pathway.weeks.flatMap((week) => week.tasks);
-  const completedIds = new Set(progress.completedTasks);
-  const completedCount = tasks.filter((task) => completedIds.has(task.id)).length;
+  const doneCount = submittedCount + reviewedCount;
+  const totalTasks = tasks.length;
 
   return {
-    totalTasks: tasks.length,
-    completedCount,
-    remainingCount: tasks.length - completedCount,
+    totalTasks,
+    doneCount,
+    submittedCount,
+    reviewedCount,
+    remainingCount: totalTasks - doneCount,
     percentage:
-      tasks.length === 0
-        ? 0
-        : Math.round((completedCount / tasks.length) * 100),
+      totalTasks === 0 ? 0 : Math.round((doneCount / totalTasks) * 100),
   };
 }
 
-export function getWeekStatus(pathway, progress, weekIndex) {
-  const week = pathway.weeks[weekIndex];
-
+/**
+ * "locked", "available", "review", or "complete".
+ *
+ * The first week is always available. A later week is available only when every
+ * task in the week before it has been submitted or reviewed.
+ */
+export function getWeekStatus(pathway, rows, weekIndex) {
+  const week = pathway?.weeks?.[weekIndex];
   if (!week) return "locked";
 
-  const completedIds = new Set(progress.completedTasks);
+  const statuses = statusByTask(rows);
+  const tasks = week.tasks ?? [];
 
-  const hasPendingReview = week.tasks.some(
-    (task) => progress.reviewFlags[task.id]?.status === "pending"
-  );
-
-  if (hasPendingReview) return "review";
-
-  const isComplete = week.tasks.every((task) => completedIds.has(task.id));
-
+  const isComplete = tasks.every((task) => statuses.get(task.id) === "reviewed");
   if (isComplete) return "complete";
+
+  const hasSubmitted = tasks.some(
+    (task) => statuses.get(task.id) === "submitted"
+  );
+  if (hasSubmitted) return "review";
 
   if (weekIndex === 0) return "available";
 
-  const previousWeekStatus = getWeekStatus(
-    pathway,
-    progress,
-    weekIndex - 1
+  const previousWeek = pathway.weeks[weekIndex - 1];
+  const previousDone = (previousWeek.tasks ?? []).every((task) =>
+    DONE_STATUSES.has(statuses.get(task.id))
   );
 
-  return previousWeekStatus === "complete" ? "available" : "locked";
+  return previousDone ? "available" : "locked";
 }
 
-export function updateTaskCompletion(pathway, progress, taskId, completed) {
-  const taskExists = pathway.weeks.some((week) =>
-    week.tasks.some((task) => task.id === taskId)
-  );
+/**
+ * The first task the learner can act on, with its week, or null when every task
+ * has been submitted or reviewed.
+ */
+export function getNextTask(pathway, rows) {
+  const statuses = statusByTask(rows);
 
-  if (!taskExists) {
-    return { ok: false, error: "This task does not exist in the pathway." };
+  for (let weekIndex = 0; weekIndex < (pathway?.weeks?.length ?? 0); weekIndex += 1) {
+    if (getWeekStatus(pathway, rows, weekIndex) === "locked") continue;
+
+    const week = pathway.weeks[weekIndex];
+    const task = (week.tasks ?? []).find(
+      (candidate) => !DONE_STATUSES.has(statuses.get(candidate.id))
+    );
+
+    if (task) return { task, week, weekIndex };
   }
 
-  const weekIndex = pathway.weeks.findIndex((week) =>
-    week.tasks.some((task) => task.id === taskId)
-  );
-
-  if (getWeekStatus(pathway, progress, weekIndex) === "locked") {
-    return {
-      ok: false,
-      error: "Complete the previous week before starting this week.",
-    };
-  }
-
-  if (progress.reviewFlags[taskId]?.status === "pending") {
-    return {
-      ok: false,
-      error: "This task is awaiting review and cannot be changed yet.",
-    };
-  }
-
-  const completedTasks = new Set(progress.completedTasks);
-
-  if (completed) {
-    completedTasks.add(taskId);
-  } else {
-    completedTasks.delete(taskId);
-  }
-
-  return {
-    ok: true,
-    progress: {
-      ...progress,
-      completedTasks: [...completedTasks],
-      updatedAt: new Date().toISOString(),
-    },
-  };
-}
-
-export function flagTaskForReview(pathway, progress, taskId, note = "") {
-  const taskExists = pathway.weeks.some((week) =>
-    week.tasks.some((task) => task.id === taskId)
-  );
-
-  if (!taskExists) {
-    return { ok: false, error: "This task does not exist in the pathway." };
-  }
-
-  const weekIndex = pathway.weeks.findIndex((week) =>
-    week.tasks.some((task) => task.id === taskId)
-  );
-
-  if (getWeekStatus(pathway, progress, weekIndex) === "locked") {
-    return {
-      ok: false,
-      error: "This week is locked until the previous week is complete.",
-    };
-  }
-
-  return {
-    ok: true,
-    progress: {
-      ...progress,
-      reviewFlags: {
-        ...progress.reviewFlags,
-        [taskId]: {
-          status: "pending",
-          note: note.trim(),
-        },
-      },
-      updatedAt: new Date().toISOString(),
-    },
-  };
-}
-
-export function clearTaskReview(pathway, progress, taskId) {
-  if (progress.reviewFlags[taskId]?.status !== "pending") {
-    return {
-      ok: false,
-      error: "This task does not have a pending review.",
-    };
-  }
-
-  return {
-    ok: true,
-    progress: {
-      ...progress,
-      reviewFlags: {
-        ...progress.reviewFlags,
-        [taskId]: {
-          ...progress.reviewFlags[taskId],
-          status: "cleared",
-        },
-      },
-      updatedAt: new Date().toISOString(),
-    },
-  };
+  return null;
 }

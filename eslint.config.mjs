@@ -61,6 +61,17 @@ export default [
     },
   },
   {
+    // These two React Compiler rules flag ordinary fetch-on-mount and
+    // "sync a form once the record arrives" patterns. Both are intentional
+    // here and are the reason a page cannot render before its data is ready,
+    // so the compiler-driven rewrites they suggest are not wanted.
+    files: ["src/**/*.{js,jsx}"],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+    },
+  },
+  {
     // Context modules intentionally export the provider component and its hook
     // together, so the pair cannot drift apart.
     files: ["src/context/**/*.jsx"],

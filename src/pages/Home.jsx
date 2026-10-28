@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "./Home.css";
 import { Link } from "react-router-dom";
 import {
@@ -8,11 +9,57 @@ import {
   Accessibility,
 } from "lucide-react";
 
+/**
+ * The hero film loops. It pauses when the visitor has asked for reduced motion,
+ * either through the system setting or the in-app display settings.
+ */
+function useHeroVideo(enabled) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const root = document.documentElement;
+
+    function sync() {
+      const reduce =
+        reduceQuery.matches || root.classList.contains("a11y-reduced-motion");
+
+      if (reduce) {
+        video.pause();
+        video.removeAttribute("autoplay");
+      } else {
+        video.setAttribute("autoplay", "");
+        const play = video.play();
+        if (play?.catch) play.catch(() => {});
+      }
+    }
+
+    sync();
+    reduceQuery.addEventListener("change", sync);
+
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => {
+      reduceQuery.removeEventListener("change", sync);
+      observer.disconnect();
+    };
+  }, [enabled]);
+
+  return videoRef;
+}
+
 export default function Home() {
+  const videoRef = useHeroVideo(true);
+
   return (
-    <main className="home-page">
+    <main id="main-content" className="home-page" tabIndex="-1">
       <section className="hero" aria-labelledby="hero-title">
         <video
+          ref={videoRef}
           className="hero-video"
           autoPlay
           muted

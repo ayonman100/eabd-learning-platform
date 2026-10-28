@@ -248,3 +248,91 @@
     animation: none;
   }
 }
+
+/* Signed-in navigation */
+.nav-signout {
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--header-border);
+  border-radius: 8px;
+  color: var(--header-text);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-signout:hover {
+  background: var(--header-hover);
+}
+
+/* The display panel reuses the shared field groups */
+.accessibility-panel .display-settings {
+  gap: 1rem;
+}
+
+.accessibility-panel .onboarding-fieldset legend,
+.accessibility-panel .accessibility-section-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--header-text);
+}
+
+.accessibility-panel .field-hint,
+.accessibility-panel .accessibility-help {
+  color: var(--header-text);
+  opacity: 0.85;
+}
+
+.accessibility-panel .segmented-option,
+.accessibility-panel .onboarding-option {
+  border-color: var(--header-border);
+  color: var(--header-text);
+  background: var(--header-bg);
+}
+
+.accessibility-panel .segmented-option[aria-pressed="true"] {
+  border-color: var(--color-secondary);
+  background: var(--color-secondary);
+  color: var(--color-surface);
+}
+
+.accessibility-panel .onboarding-option:hover {
+  background: var(--header-hover);
+}
+
+.accessibility-extra {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--header-border);
+}
+
+.reading-controls {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.reading-speed-control {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--header-text);
+}
+
+.reading-speed-control input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--color-secondary);
+}
+
+.reading-speed-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}

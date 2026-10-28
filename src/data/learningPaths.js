@@ -28,18 +28,27 @@ export const learningPaths = [
         tasks: [
           {
             id: "w1-t1",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The learner found the main tools in Canva using their preferred access method.",
             title: "Open Canva and explore the workspace",
             description:
               "Find the main tools using the learner's preferred access method.",
           },
           {
             id: "w1-t2",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The poster has a clear audience and message written in the learner's own words.",
             title: "Choose a community event or message",
             description:
               "Decide what the poster should communicate and who it is for.",
           },
           {
             id: "w1-t3",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The learner identified readable text and a clear message in the examples.",
             title: "Look at examples of clear posters",
             description:
               "Identify readable text, useful images, and a clear message.",
@@ -53,18 +62,27 @@ export const learningPaths = [
         tasks: [
           {
             id: "w2-t1",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The template suits the message and the learner's access needs.",
             title: "Choose a suitable poster template",
             description:
               "Select a template that fits the message and access needs.",
           },
           {
             id: "w2-t2",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The event name, date, time and venue are present and accurate.",
             title: "Add the key event information",
             description:
               "Include the event name, date, time, venue, and contact details where relevant.",
           },
           {
             id: "w2-t3",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The draft has all the planned content arranged on the page.",
             title: "Create the first poster draft",
             description:
               "Arrange the text and visual elements into a clear layout.",
@@ -78,18 +96,27 @@ export const learningPaths = [
         tasks: [
           {
             id: "w3-t1",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The layout is easy to follow and free of unnecessary clutter.",
             title: "Improve the layout and spacing",
             description:
               "Make the message easy to follow and avoid unnecessary clutter.",
           },
           {
             id: "w3-t2",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "Contrast and text size are readable at the intended size.",
             title: "Check contrast and text readability",
             description:
               "Review colours, font sizes, and readability on the intended screen or print size.",
           },
           {
             id: "w3-t3",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The learner asked for feedback and understood what was suggested.",
             title: "Review the poster with a support person",
             description:
               "Ask for feedback using the learner's preferred communication method.",
@@ -103,18 +130,27 @@ export const learningPaths = [
         tasks: [
           {
             id: "w4-t1",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The final edits respond to the feedback that was given.",
             title: "Make final edits",
             description:
               "Use the feedback to improve the poster.",
           },
           {
             id: "w4-t2",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The poster was exported in a suitable format for its purpose.",
             title: "Export the finished poster",
             description:
               "Save the design in a suitable format with support if needed.",
           },
           {
             id: "w4-t3",
+            canvaUrl: "https://www.canva.com/",
+            reviewPrompt:
+              "The learner presented the poster and described what they learned.",
             title: "Present the poster for review",
             description:
               "Share the completed design and discuss what was learned.",
