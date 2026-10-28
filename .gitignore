@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Vite production output
 /dist/
+
+# Supabase CLI local state
+supabase/.temp/
