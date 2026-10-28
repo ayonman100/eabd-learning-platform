@@ -20,12 +20,16 @@ function useHeroVideo(enabled) {
     const video = videoRef.current;
     if (!video) return undefined;
 
-    const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const root = document.documentElement;
+    const reduceQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
 
     function sync() {
       const reduce =
-        reduceQuery.matches || root.classList.contains("a11y-reduced-motion");
+        Boolean(reduceQuery?.matches) ||
+        root.classList.contains("a11y-reduced-motion");
 
       if (reduce) {
         video.pause();
@@ -38,13 +42,13 @@ function useHeroVideo(enabled) {
     }
 
     sync();
-    reduceQuery.addEventListener("change", sync);
+    reduceQuery?.addEventListener("change", sync);
 
     const observer = new MutationObserver(sync);
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
 
     return () => {
-      reduceQuery.removeEventListener("change", sync);
+      reduceQuery?.removeEventListener("change", sync);
       observer.disconnect();
     };
   }, [enabled]);
