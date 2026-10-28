@@ -10,7 +10,8 @@ node scripts/rls-check.mjs   # database policies against a real project
 ```
 
 The first three run without credentials. The fourth needs a linked project and three test
-accounts.
+accounts. A fifth step, a browser pass through the running app, is described under
+[Browser testing with Cursor](#browser-testing-with-cursor).
 
 ## Lint
 
@@ -117,9 +118,15 @@ in, then serves it from nginx with:
 - A try-files fallback so client-side routes work on refresh.
 - Immutable caching for fingerprinted assets.
 - No caching for `index.html`, so a new build is picked up.
-- A `/healthz` endpoint for container health.
+- A `/healthz` endpoint for the container health check, served on both IPv4 and IPv6.
 
 Rebuild after changing environment values, because Vite inlines them at build time.
+
+Check that the container reports healthy, not just that a port answers:
+
+```bash
+docker ps --format '{{.Names}}\t{{.Status}}'
+```
 
 To stop it:
 
@@ -127,7 +134,52 @@ To stop it:
 docker compose down
 ```
 
+## Browser testing with Cursor
+
+Cursor has a built-in **Browser** tool. No MCP server or extension needs installing. It is
+documented at [cursor.com/docs/agent/tools/browser](https://cursor.com/docs/agent/tools/browser).
+
+What matters for this project:
+
+| Point | Detail |
+| --- | --- |
+| How to invoke it | Ask in plain language, or mention `@browser` in the prompt |
+| Approach | It navigates, clicks, types, scrolls, takes screenshots, and reports console output |
+| Approval | Browser tools ask for approval by default; allow-listing is configured in Settings, then Agents, then Auto-Run |
+| Sign-in walls | The documented answer is to tell the agent how to sign in; cookies and local storage persist per workspace |
+| Origin allowlist | Enterprise only. When enabled, only listed origins can be browsed automatically |
+
+### The practical constraint in this repository
+
+The Browser tool runs in an isolated network context per workspace. A server started by a
+short-lived shell command **stops when that command ends**, so the browser then cannot reach
+it. That is why a `vite preview` started from a tool call appears to fail.
+
+The reliable pattern is to serve from something that outlives a single command:
+
+```bash
+docker compose --env-file .env.local up --build -d
+```
+
+Then ask the agent to open `http://localhost:8080` and test the flow. Steps that need a signed-in
+account require the database migration to be applied and a confirmed account, because a session
+cannot be invented by the browser.
+
+### What the browser pass covers
+
+- Every public page renders, with exactly one `h1` and a working skip link.
+- The account type radio changes the name field label.
+- The password toggles flip `aria-pressed` and their accessible label.
+- A protected route redirects to `/signin` when signed out.
+- The display panel opens from the header, and Escape closes it and returns focus to the trigger.
+- Form submission shows the in-flight label, then either an alert on failure or a status message
+  on success.
+
+Component-level coverage of the same surfaces lives in `src/pages/pages-smoke.test.jsx`, which
+renders each page with mocked contexts and data. That suite runs in CI; the browser pass does not.
+
 ## Manual rehearsal script
+
 
 Before handing a build to someone else, run this against the test project:
 
