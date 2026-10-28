@@ -1,4 +1,4 @@
-﻿/* Shared accessibility utilities */
+﻿/* Shared accessibility utilities. Loaded after index.css so the tokens are available. */
 
 .skip-link {
   position: absolute;
@@ -7,8 +7,8 @@
   z-index: 9999;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #1e3a8a;
+  background: var(--color-surface);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -17,8 +17,8 @@
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus-color, #0d9488);
-  outline-offset: 4px;
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 .sr-only {

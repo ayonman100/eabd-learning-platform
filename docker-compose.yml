@@ -1,0 +1,14 @@
+name: eabd-learning-platform
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        # Vite inlines these at build time; they come from .env.local so no
+        # publishing step or manual export is needed.
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

@@ -10,12 +10,9 @@ import {
   Volume2,
   VolumeX,
   X,
-  Type,
   Pause,
   Play,
   RotateCcw,
-  Minus,
-  Plus,
   ALargeSmall,
 } from "lucide-react";
 import "./Navbar.css";

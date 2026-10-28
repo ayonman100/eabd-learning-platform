@@ -115,11 +115,6 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
-:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
-}
-
 ::selection {
   background: var(--color-secondary);
   color: #ffffff;

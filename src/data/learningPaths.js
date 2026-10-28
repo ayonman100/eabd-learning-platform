@@ -124,3 +124,19 @@ export const learningPaths = [
     ],
   },
 ];
+
+export const DEFAULT_PATHWAY_ID = learningPaths[0].id;
+
+export function getPathwayById(pathwayId) {
+  if (!pathwayId) return null;
+  return learningPaths.find((pathway) => pathway.id === pathwayId) ?? null;
+}
+
+export function getPathwayOrFirst(pathwayId) {
+  return getPathwayById(pathwayId) ?? learningPaths[0];
+}
+
+export function getPathwayTasks(pathway) {
+  if (!pathway?.weeks) return [];
+  return pathway.weeks.flatMap((week) => week.tasks);
+}

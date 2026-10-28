@@ -37,20 +37,6 @@ export default function Onboarding() {
 
     // Temporary demonstration only.
     // This does not save onboarding data to Supabase.
-    const onboardingDraft = {
-      pathwayId,
-      goal: goal.trim(),
-      currentPosition: currentPosition.trim(),
-      barriers: barriers.trim(),
-      support: support.trim(),
-      resources: resources.trim(),
-      pace,
-      otherDetails: otherDetails.trim(),
-      sampleName: sample?.name || null,
-    };
-
-    console.info("Onboarding demonstration draft:", onboardingDraft);
-
     navigate(
       `/dashboard?pathway=${encodeURIComponent(pathwayId)}&setup=demo`,
       { replace: true }
@@ -216,6 +202,11 @@ export default function Onboarding() {
               PDF, PNG or JPG. This demo only selects a file locally.
               It does not upload or save the file.
             </p>
+            {sample && (
+              <p role="status" className="auth-help">
+                Selected locally: {sample.name}. Nothing has been uploaded.
+              </p>
+            )}
           </div>
 
           <button type="submit">Continue to dashboard</button>

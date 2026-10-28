@@ -3,6 +3,7 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowJs": true,
+    "checkJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -13,6 +14,6 @@
     "isolatedModules": true,
     "jsx": "react-jsx"
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.mts"],
-  "exclude": ["node_modules", "dist", ".next"]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.mjs"],
+  "exclude": ["node_modules", "dist"]
 }

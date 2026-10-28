@@ -1,14 +1,12 @@
-
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
-import {
-  isSupabaseConfigured,
-  supabase,
-} from "../lib/supabase.js";
+import { isSupabaseConfigured, supabase } from "../lib/supabase.js";
 
 const AuthContext = createContext(null);
 
@@ -28,14 +26,17 @@ function unavailable() {
   };
 }
 
+function isReady() {
+  return Boolean(isSupabaseConfigured && supabase);
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
+  // When Supabase is not configured there is nothing to load, so the app starts settled.
   const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      setSession(null);
-      setLoading(false);
+    if (!isReady()) {
       return undefined;
     }
 
@@ -48,10 +49,7 @@ export function AuthProvider({ children }) {
         if (!mounted) return;
 
         if (error) {
-          console.error(
-            "Could not load the learner session:",
-            error.message
-          );
+          console.error("Could not load the learner session:", error.message);
         }
 
         setSession(data?.session ?? null);
@@ -82,26 +80,29 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  async function signUp({ name, email, password, emailRedirectTo }) {
-    if (!isSupabaseConfigured || !supabase) {
-      return {
-        data: null,
-        error: new Error(CONFIGURATION_ERROR),
-      };
-    }
+  const signUp = useCallback(
+    async ({ name, email, password, emailRedirectTo, accountType = "learner" }) => {
+      if (!isReady()) {
+        return {
+          data: null,
+          error: new Error(CONFIGURATION_ERROR),
+        };
+      }
 
-    return supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name },
-        emailRedirectTo,
-      },
-    });
-  }
+      return supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name, account_type: accountType },
+          emailRedirectTo,
+        },
+      });
+    },
+    []
+  );
 
-  async function signIn({ email, password }) {
-    if (!isSupabaseConfigured || !supabase) {
+  const signIn = useCallback(async ({ email, password }) => {
+    if (!isReady()) {
       return {
         data: null,
         error: new Error(CONFIGURATION_ERROR),
@@ -109,58 +110,66 @@ export function AuthProvider({ children }) {
     }
 
     return supabase.auth.signInWithPassword({ email, password });
-  }
+  }, []);
 
-  async function signOut() {
-    if (!isSupabaseConfigured || !supabase) {
-      return {
-        error: new Error(CONFIGURATION_ERROR),
-      };
+  const signOut = useCallback(async () => {
+    if (!isReady()) {
+      return { error: new Error(CONFIGURATION_ERROR) };
     }
 
     return supabase.auth.signOut();
-  }
+  }, []);
 
-  async function signInWithPasskey() {
-    if (!isSupabaseConfigured || !supabase) return unavailable();
+  const signInWithPasskey = useCallback(async () => {
+    if (!isReady()) return unavailable();
     return supabase.auth.signInWithPasskey();
-  }
+  }, []);
 
-  async function registerPasskey() {
-    if (!isSupabaseConfigured || !supabase) return unavailable();
+  const registerPasskey = useCallback(async () => {
+    if (!isReady()) return unavailable();
     return supabase.auth.registerPasskey();
-  }
+  }, []);
 
-  async function listPasskeys() {
-    if (!isSupabaseConfigured || !supabase) return unavailable();
+  const listPasskeys = useCallback(async () => {
+    if (!isReady()) return unavailable();
     return supabase.auth.passkey.list();
-  }
+  }, []);
 
-  async function removePasskey(passkeyId) {
-    if (!isSupabaseConfigured || !supabase) return unavailable();
+  const removePasskey = useCallback(async (passkeyId) => {
+    if (!isReady()) return unavailable();
     return supabase.auth.passkey.delete({ passkeyId });
-  }
+  }, []);
 
-  const value = {
-    session,
-    user: session?.user ?? null,
-    loading,
-    isSupabaseConfigured,
-    passkeysSupported,
-    signUp,
-    signIn,
-    signOut,
-    signInWithPasskey,
-    registerPasskey,
-    listPasskeys,
-    removePasskey,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      session,
+      user: session?.user ?? null,
+      accountType: session?.user?.user_metadata?.account_type ?? "learner",
+      loading,
+      isSupabaseConfigured,
+      passkeysSupported,
+      signUp,
+      signIn,
+      signOut,
+      signInWithPasskey,
+      registerPasskey,
+      listPasskeys,
+      removePasskey,
+    }),
+    [
+      session,
+      loading,
+      signUp,
+      signIn,
+      signOut,
+      signInWithPasskey,
+      registerPasskey,
+      listPasskeys,
+      removePasskey,
+    ]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

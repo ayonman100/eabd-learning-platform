@@ -1,12 +1,6 @@
 
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  BookOpen,
-  CheckCircle2,
-  Compass,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Compass, UserRound } from "lucide-react";
 import { learningPaths } from "../data/learningPaths.js";
 import { useAuth } from "../context/AuthContext.jsx";
 

@@ -48,8 +48,7 @@ export default function Account() {
     return () => {
       active = false;
     };
-    // listPasskeys is recreated on every render of AuthProvider.
-  }, [passkeysSupported, reloadCount]);
+  }, [passkeysSupported, reloadCount, listPasskeys]);
 
   async function handleAdd() {
     setError("");
