@@ -10,6 +10,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const registrationType = searchParams.get("type") === "other" ? "other" : "self";
   const selectedPathway = searchParams.get("pathway") || "";
   const pathway = learningPaths.find(
     (item) => item.id === selectedPathway
@@ -47,7 +48,8 @@ export default function SignUp() {
         name: name.trim(),
         email: email.trim(),
         password,
-        emailRedirectTo: `${window.location.origin}/onboarding`,
+        emailRedirectTo: `${window.location.origin}/onboarding?type=${registrationType}${pathway ? `&pathway=${encodeURIComponent(pathway.id)}` : ""}`,
+        registrationType,
       });
 
       if (signUpError) throw signUpError;
@@ -56,7 +58,7 @@ export default function SignUp() {
         navigate(
           pathway
             ? `/onboarding?pathway=${encodeURIComponent(pathway.id)}`
-            : "/onboarding",
+            : `/onboarding?type=${registrationType}`,
           { replace: true }
         );
       } else {
@@ -78,6 +80,7 @@ export default function SignUp() {
       <section className="auth-card" aria-labelledby="signup-heading">
         <p className="auth-eyebrow">YOUR NEXT CHAPTER</p>
         <h1 id="signup-heading">Create your EABD account</h1>
+        <p>{registrationType === "other" ? "You are creating an account to support a learner." : "You are creating an account for yourself."}</p>
         <p>
           Start with your interests. We'll help you explore a practical
           learning pathway around your goals.

@@ -1,1 +1,79 @@
-﻿/* Styles for NotFound. Add component-specific rules here. */
+﻿.not-found-page {
+  min-height: 55vh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.25rem;
+}
+
+.not-found-card {
+  width: min(100%, 42rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid var(--color-border, #dbe3ee);
+  border-radius: 1.25rem;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0f172a);
+  box-shadow: 0 18px 45px rgb(15 23 42 / 8%);
+}
+
+.not-found-eyebrow {
+  color: var(--color-secondary, #0d9488);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.not-found-card h1 {
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.not-found-card > p:not(.not-found-eyebrow) {
+  line-height: 1.7;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.not-found-primary,
+.not-found-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.9rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-primary, #1e3a8a);
+  border-radius: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.not-found-primary {
+  background: var(--color-primary, #1e3a8a);
+  color: #fff;
+}
+
+.not-found-secondary {
+  background: transparent;
+  color: var(--color-primary, #1e3a8a);
+}
+
+.not-found-primary:focus-visible,
+.not-found-secondary:focus-visible {
+  outline: 3px solid var(--color-secondary, #0d9488);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .not-found-actions {
+    flex-direction: column;
+  }
+
+  .not-found-actions a {
+    width: 100%;
+  }
+}

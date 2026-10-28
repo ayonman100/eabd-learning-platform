@@ -1,1 +1,95 @@
-﻿/* Styles for Footer. Add component-specific rules here. */
+﻿.site-footer {
+  margin-top: 3rem;
+  border-top: 1px solid var(--color-border, #dbe3ee);
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #0f172a);
+}
+
+.site-footer-inner {
+  width: min(100% - 2rem, 74rem);
+  margin-inline: auto;
+  padding: 2rem 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem 2rem;
+}
+
+.site-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.site-footer-brand img {
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.site-footer-brand strong {
+  display: block;
+  line-height: 1.5;
+}
+
+.site-footer-brand p,
+.site-footer-note {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted, #475569);
+  line-height: 1.6;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem 1.25rem;
+}
+
+.site-footer a {
+  color: var(--color-primary, #1e3a8a);
+  font-weight: 650;
+  text-underline-offset: 0.2em;
+}
+
+.site-footer-links a {
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+.site-footer-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  justify-self: end;
+}
+
+.site-footer-note {
+  justify-self: start;
+  font-size: 0.9rem;
+}
+
+.site-footer a:focus-visible {
+  outline: 3px solid var(--color-secondary, #0d9488);
+  outline-offset: 4px;
+  border-radius: 0.2rem;
+}
+
+@media (max-width: 680px) {
+  .site-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .site-footer-links {
+    justify-content: flex-start;
+  }
+
+  .site-footer-contact {
+    justify-self: start;
+  }
+}

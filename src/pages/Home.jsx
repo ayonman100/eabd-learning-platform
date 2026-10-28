@@ -55,6 +55,11 @@ export default function Home() {
             <Link className="button button-secondary" to="/about">
               Discover EABD
             </Link>
+
+            <Link className="button button-secondary" to="/signup">
+              Get started
+              <ArrowRight size={18} aria-hidden="true" />
+            </Link>
           </div>
 
           <p className="hero-note">

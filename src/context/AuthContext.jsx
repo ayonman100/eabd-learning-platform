@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  async function signUp({ name, email, password, emailRedirectTo }) {
+  async function signUp({ name, email, password, emailRedirectTo, registrationType = "self" }) {
     if (!isSupabaseConfigured || !supabase) {
       return {
         data: null,
@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
       email,
       password,
       options: {
-        data: { full_name: name },
+        data: { full_name: name, registration_type: registrationType },
         emailRedirectTo,
       },
     });

@@ -1,6 +1,6 @@
-
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import {
   Accessibility,
   Contrast,
@@ -17,6 +17,12 @@ import {
   Minus,
   Plus,
   ALargeSmall,
+  LayoutDashboard,
+  CircleUserRound,
+  LogOut,
+  ChevronDown,
+  BookOpen,
+  TrendingUp,
 } from "lucide-react";
 import "./Navbar.css";
 
@@ -41,12 +47,57 @@ function loadSettings() {
 }
 
 export default function SiteHeader() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState(loadSettings);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const [accessibilityOpen, setAccessibilityOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const utteranceRef = useRef(null);
+  useEffect(() => {
+    function handleDropdownKeyDown(event) {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    }
+
+    function handleOutsidePointerDown(event) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleDropdownKeyDown);
+    document.addEventListener("pointerdown", handleOutsidePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleDropdownKeyDown);
+      document.removeEventListener("pointerdown", handleOutsidePointerDown);
+    };
+  }, []);
+  async function handleSignOut() {
+    try {
+      const { error } = await signOut();
+
+      if (error) {
+        console.error("Sign out failed:", error.message);
+        window.alert("We could not sign you out. Please try again.");
+        return;
+      }
+
+      setMenuOpen(false);
+      navigate("/signin", { replace: true });
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      window.alert("We could not sign you out. Please try again.");
+    }
+  }
 
   function updateSetting(name, value) {
     setSettings((current) => ({ ...current, [name]: value }));
@@ -189,6 +240,7 @@ export default function SiteHeader() {
 
   function closeMenu() {
     setMenuOpen(false);
+    setProfileOpen(false);
   }
 
   return (
@@ -227,11 +279,94 @@ export default function SiteHeader() {
           aria-label="Main navigation"
         >
           <NavLink to="/" end onClick={closeMenu}>Home</NavLink>
-          <NavLink to="/about" onClick={closeMenu}>About</NavLink>
-          <NavLink to="/explore" onClick={closeMenu}>Explore</NavLink>
-          <NavLink className="nav-cta" to="/signin" onClick={closeMenu}>
-            Learner sign in
-          </NavLink>
+
+          {user ? (
+            <>
+              <NavLink to="/explore" onClick={closeMenu}>
+                Explore
+              </NavLink>
+
+              <NavLink to="/dashboard" onClick={closeMenu}>
+                <LayoutDashboard size={17} aria-hidden="true" />
+                Dashboard
+              </NavLink>
+
+              <div className="profile-menu" ref={profileMenuRef}>
+                <button
+                  className={`profile-menu-trigger${profileOpen ? " is-open" : ""}`}
+                  type="button"
+                  aria-expanded={profileOpen}
+                  aria-controls="learner-profile-menu"
+                  onClick={() => setProfileOpen((open) => !open)}
+                >
+                  <CircleUserRound size={19} aria-hidden="true" />
+                  <span>My profile</span>
+                  <ChevronDown
+                    className="profile-menu-chevron"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {profileOpen && (
+                  <div
+                    className="profile-menu-panel"
+                    id="learner-profile-menu"
+                    aria-label="Learner menu"
+                  >
+                    <NavLink to="/learning-journey" onClick={closeMenu}>
+                      <BookOpen size={17} aria-hidden="true" />
+                      My learning
+                    </NavLink>
+
+                    <NavLink
+                      to="/learning-journey#progress-heading"
+                      onClick={closeMenu}
+                    >
+                      <TrendingUp size={17} aria-hidden="true" />
+                      My learning progress
+                    </NavLink>
+
+                    <NavLink to="/account" onClick={closeMenu}>
+                      <CircleUserRound size={17} aria-hidden="true" />
+                      My account
+                    </NavLink>
+
+                    <button
+                      className="profile-menu-signout"
+                      type="button"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut size={17} aria-hidden="true" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <NavLink to="/about" onClick={closeMenu}>
+                About
+              </NavLink>
+
+              <NavLink to="/explore" onClick={closeMenu}>
+                Explore
+              </NavLink>
+
+              <NavLink to="/signin" onClick={closeMenu}>
+                Sign in
+              </NavLink>
+
+              <NavLink
+                className="nav-cta"
+                to="/signup"
+                onClick={closeMenu}
+              >
+                Create account
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className="header-tools">
@@ -363,7 +498,7 @@ export default function SiteHeader() {
           </div>
 
           <label className="reading-speed-control" htmlFor="reading-rate">
-            Reading speed: {settings.readingRate.toFixed(1)}×
+            Reading speed: {settings.readingRate.toFixed(1)}Ã—
             <input
               id="reading-rate"
               type="range"

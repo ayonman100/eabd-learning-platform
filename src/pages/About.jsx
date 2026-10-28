@@ -76,8 +76,8 @@ export default function About() {
             </h1>
 
             <p className="about-hero-description">
-              Empowering Ability Beyond Disability (EABD) helps people
-              identify and address the barriers between their interests
+              Empowering Ability Beyond Disability (EABD) is an initiative that helps empower young people age 15-24
+              in education, living in Lagos Nigeria, identify and address the barriers between skills of their interests
               and the goals they want to pursue.
             </p>
 
