@@ -667,12 +667,15 @@ a {
 }
 
 .learning-notice {
-  border: 1px solid #8dbba0;
+  border: 1px solid var(--color-success-border);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
 }
 
 .learning-error {
-  border: 2px solid #a32626;
-  color: #a32626;
+  border: 2px solid var(--color-danger-border);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
 }
 
 .learning-weeks {
@@ -709,19 +712,19 @@ a {
 }
 
 .status-available {
-  color: var(--color-primary, #315f45);
+  color: var(--color-primary);
 }
 
 .status-complete {
-  color: #24683e;
+  color: var(--color-success-text);
 }
 
 .status-locked {
-  color: var(--color-muted, #555);
+  color: var(--color-muted);
 }
 
 .status-review {
-  color: #8a4b00;
+  color: var(--color-warning-text);
 }
 
 .learning-task-list {

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLearner } from "../context/LearnerContext.jsx";
+import { saveUiSettings } from "../lib/db/learners.js";
 import {
   DEFAULT_SETTINGS,
   deriveAdaptations,
@@ -38,6 +39,18 @@ function loadStoredSettings() {
   }
 }
 
+// Only the display keys belong on the learner record; the reading speed and the
+// theme choice stay on the device.
+const RECORD_KEYS = Object.keys(DEFAULT_SETTINGS);
+
+function pickDisplaySettings(overrides) {
+  const picked = {};
+  for (const key of RECORD_KEYS) {
+    if (key in overrides) picked[key] = overrides[key];
+  }
+  return picked;
+}
+
 export default function SiteHeader() {
   const { user, signOut } = useAuth();
   const { learner, isSupervisor } = useLearner();
@@ -52,6 +65,22 @@ export default function SiteHeader() {
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
   const utteranceRef = useRef(null);
+
+  // The record is the source of truth once it has loaded; local storage keeps
+  // the panel working for a visitor who is not signed in.
+  const savedFromRecord = useRef(false);
+  useEffect(() => {
+    if (!learner?.id || savedFromRecord.current) return;
+    const stored = learner.ui_settings;
+    if (stored && Object.keys(stored).length > 0) {
+      setOverrides((current) => ({
+        ...current,
+        ...stored,
+        readingRate: current.readingRate,
+      }));
+    }
+    savedFromRecord.current = true;
+  }, [learner?.id, learner?.ui_settings]);
 
   const settings = useMemo(
     () => resolveSettings(deriveAdaptations(learner), overrides),
@@ -96,6 +125,23 @@ export default function SiteHeader() {
       // Settings stay active for this session.
     }
   }, [overrides]);
+
+  // Persist the display choices onto the learner record so they follow the
+  // person to another device. Debounced: a slider drag should not save per step.
+  const learnerId = learner?.id ?? null;
+  useEffect(() => {
+    if (!learnerId) return undefined;
+
+    const timer = window.setTimeout(() => {
+      saveUiSettings(learnerId, pickDisplaySettings(overrides)).catch(
+        (saveError) => {
+          console.error("Could not save display settings:", saveError.message);
+        }
+      );
+    }, 800);
+
+    return () => window.clearTimeout(timer);
+  }, [learnerId, overrides]);
 
   // Voices arrive asynchronously in most browsers.
   useEffect(() => {
