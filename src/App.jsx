@@ -10,6 +10,7 @@ import SignUp from "./pages/SignUp.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import LearningJourney from "./pages/LearningJourney.jsx";
+import Account from "./pages/Account.jsx";
 
 function NotFound() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
         {/* Protected learner pages */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/account" element={<Account />} />
         </Route>
 
         {/* Unknown routes */}

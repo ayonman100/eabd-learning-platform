@@ -15,6 +15,19 @@ const AuthContext = createContext(null);
 const CONFIGURATION_ERROR =
   "Account services are unavailable because Supabase is not configured. Please try again later.";
 
+// WebAuthn only runs on HTTPS or localhost, in browsers that expose PublicKeyCredential.
+const passkeysSupported =
+  typeof window !== "undefined" &&
+  window.isSecureContext &&
+  typeof window.PublicKeyCredential === "function";
+
+function unavailable() {
+  return {
+    data: null,
+    error: new Error(CONFIGURATION_ERROR),
+  };
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
@@ -108,14 +121,39 @@ export function AuthProvider({ children }) {
     return supabase.auth.signOut();
   }
 
+  async function signInWithPasskey() {
+    if (!isSupabaseConfigured || !supabase) return unavailable();
+    return supabase.auth.signInWithPasskey();
+  }
+
+  async function registerPasskey() {
+    if (!isSupabaseConfigured || !supabase) return unavailable();
+    return supabase.auth.registerPasskey();
+  }
+
+  async function listPasskeys() {
+    if (!isSupabaseConfigured || !supabase) return unavailable();
+    return supabase.auth.passkey.list();
+  }
+
+  async function removePasskey(passkeyId) {
+    if (!isSupabaseConfigured || !supabase) return unavailable();
+    return supabase.auth.passkey.delete({ passkeyId });
+  }
+
   const value = {
     session,
     user: session?.user ?? null,
     loading,
     isSupabaseConfigured,
+    passkeysSupported,
     signUp,
     signIn,
     signOut,
+    signInWithPasskey,
+    registerPasskey,
+    listPasskeys,
+    removePasskey,
   };
 
   return (

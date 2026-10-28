@@ -1,10 +1,12 @@
 
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Fingerprint } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { passkeyErrorMessage } from "../lib/passkeys.js";
 
 export default function SignIn() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithPasskey, passkeysSupported } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -13,8 +15,26 @@ export default function SignIn() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
 
   const destination = location.state?.from?.pathname || "/dashboard";
+
+  async function handlePasskey() {
+    setError("");
+    setMessage("");
+    setPasskeyBusy(true);
+
+    const { error: passkeyError } = await signInWithPasskey();
+
+    setPasskeyBusy(false);
+
+    if (passkeyError) {
+      setError(passkeyErrorMessage(passkeyError));
+      return;
+    }
+
+    navigate(destination, { replace: true });
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -52,6 +72,28 @@ export default function SignIn() {
         {message && <p role="status">{message}</p>}
         {error && <p className="auth-error" role="alert">{error}</p>}
 
+        {passkeysSupported && (
+          <>
+            <button
+              type="button"
+              className="auth-passkey-button"
+              onClick={handlePasskey}
+              disabled={passkeyBusy || submitting}
+              aria-describedby="signin-passkey-help"
+            >
+              <Fingerprint aria-hidden="true" size={22} />
+              {passkeyBusy
+                ? "Waiting for your device..."
+                : "Sign in with face or fingerprint"}
+            </button>
+            <small id="signin-passkey-help" className="auth-passkey-help">
+              Set this up once from your account, after signing in with
+              your email.
+            </small>
+            <p className="auth-divider">or use your email</p>
+          </>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="auth-field">
             <label htmlFor="signin-email">Email address</label>
@@ -79,7 +121,7 @@ export default function SignIn() {
             />
           </div>
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" disabled={submitting || passkeyBusy}>
             {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>

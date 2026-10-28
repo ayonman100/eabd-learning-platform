@@ -35,6 +35,10 @@ export default function Dashboard() {
           Your goals lead the way. Use this space to explore your pathway
           and take your next practical step.
         </p>
+        <Link className="dashboard-account-link" to="/account">
+          Your account and face or fingerprint sign-in
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </section>
 
       <section
