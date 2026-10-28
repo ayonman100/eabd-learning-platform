@@ -20,6 +20,7 @@ export default function OnboardingStep({
   onBack,
   secondaryAction,
   showBack = true,
+  primaryAction = true,
 }) {
   const headingRef = useRef(null);
   const current = stepIndex(stepKey);
@@ -76,9 +77,12 @@ export default function OnboardingStep({
                   Back
                 </button>
               )}
-              <button type="submit" disabled={submitting}>
-                {submitting ? "Saving..." : submitLabel}
-              </button>
+              {/* The document step supplies its own actions, so it opts out. */}
+              {primaryAction !== false && (
+                <button type="submit" disabled={submitting}>
+                  {submitting ? "Saving..." : submitLabel}
+                </button>
+              )}
             </div>
           </form>
 

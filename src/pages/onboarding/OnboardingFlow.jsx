@@ -408,6 +408,7 @@ export default function OnboardingFlow() {
         error={error}
         onSubmit={(event) => event.preventDefault()}
         onBack={goBack}
+        primaryAction={false}
       >
         <StatusMessage>{notice}</StatusMessage>
         <StepDocument
