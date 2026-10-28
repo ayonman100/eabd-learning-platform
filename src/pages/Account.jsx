@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Fingerprint, LogOut, Trash2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { formatPasskeyDate, passkeyErrorMessage } from "../lib/passkeys.js";
+import { ErrorMessage, StatusMessage } from "../components/ui/StatusBanner.jsx";
 
 export default function Account() {
   const {
@@ -104,8 +105,8 @@ export default function Account() {
         <h1 id="account-heading">{name}</h1>
         <p>{user?.email}</p>
 
-        {message && <p role="status">{message}</p>}
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        <StatusMessage>{message}</StatusMessage>
+        <ErrorMessage>{error}</ErrorMessage>
 
         <section
           className="account-section"
