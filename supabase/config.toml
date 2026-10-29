@@ -37,3 +37,14 @@ enable_confirmations = false
 
 [functions.extract-document]
 verify_jwt = true
+
+# Passkeys. The RP ID must be the bare domain with no scheme or port, and it must
+# stay stable: changing it invalidates every passkey already enrolled.
+# Local development uses localhost, which WebAuthn treats as a secure context.
+[auth.passkey]
+enabled = true
+
+[auth.webauthn]
+rp_display_name = "EABD"
+rp_id = "localhost"
+rp_origins = ["http://localhost:8080", "http://localhost:5173"]
