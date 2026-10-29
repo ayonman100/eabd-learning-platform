@@ -7,6 +7,7 @@ import { listTaskProgress } from "../lib/db/progress.js";
 import { latestReviewByTask, listReviews } from "../lib/db/reviews.js";
 import { getNextTask, getProgressSummary } from "../utils/progress.js";
 import { deriveAdaptations, resolveSettings } from "../lib/adaptations.js";
+import Button from "../components/ui/Button.jsx";
 import ReviewFeedbackCard from "../components/ui/ReviewFeedbackCard.jsx";
 import { ErrorMessage } from "../components/ui/StatusBanner.jsx";
 
@@ -65,33 +66,32 @@ export default function Dashboard() {
   )[0];
 
   return (
-    <main id="main-content" className="dashboard-page" tabIndex="-1">
-      <div className="dashboard-inner">
-        <section className="dashboard-welcome">
-          <p className="dashboard-eyebrow">
-            {isGuardian ? "LEARNER RECORD" : "YOUR EABD LEARNING SPACE"}
+    <main id="main-content" className="page" tabIndex="-1">
+      <div className="page-inner">
+        <section className="page-header">
+          <p className="page-eyebrow">
+            {isGuardian ? "Learner record" : "Your EABD learning space"}
           </p>
-          <h1>{isGuardian ? `${name}'s learning space` : `Welcome, ${name}.`}</h1>
-          <p>
+          <h1 className="page-title">
+            {isGuardian ? `${name}'s learning space` : `Welcome, ${name}.`}
+          </h1>
+          <p className="page-lead">
             {isGuardian
               ? "Everything here belongs to the young person you support. You can change any answer with them."
               : "Your goals lead the way. Use this space to take your next practical step."}
           </p>
 
-          <div className="dashboard-links">
-            <Link className="dashboard-account-link" to="/profile">
+          <div className="page-actions">
+            <Button variant="secondary" to="/profile" iconAfter={<ArrowRight size={16} />}>
               Your record and adjustments
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-            <Link className="dashboard-account-link" to="/account">
-              Account and face or fingerprint sign-in
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
+            </Button>
+            <Button variant="quiet" to="/account">
+              Account and sign-in
+            </Button>
             {isSupervisor && (
-              <Link className="dashboard-account-link" to="/supervisor">
+              <Button variant="quiet" to="/supervisor">
                 Supervisor area
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
+              </Button>
             )}
           </div>
         </section>
@@ -109,13 +109,12 @@ export default function Dashboard() {
                   A few questions about what helps this person learn will shape
                   the screen and the pathway.
                 </p>
-                <Link
-                  className="dashboard-primary-link"
+                <Button
                   to={`/onboarding?pathway=${encodeURIComponent(pathway.id)}`}
+                  iconAfter={<ArrowRight size={18} />}
                 >
                   Continue setting up
-                  <ArrowRight size={18} aria-hidden="true" />
-                </Link>
+                </Button>
               </div>
             </div>
           </section>
@@ -133,13 +132,12 @@ export default function Dashboard() {
                 </p>
                 <h3>{next.task.title}</h3>
                 <p>{next.task.description}</p>
-                <Link
-                  className="dashboard-primary-link"
+                <Button
                   to={`/learning-journey?pathway=${encodeURIComponent(pathway.id)}`}
+                  iconAfter={<ArrowRight size={18} />}
                 >
                   Open this step
-                  <ArrowRight size={18} aria-hidden="true" />
-                </Link>
+                </Button>
               </article>
             ) : (
               <article className="dashboard-next-card">
@@ -189,13 +187,12 @@ export default function Dashboard() {
                 </p>
 
                 <div className="dashboard-actions">
-                  <Link
-                    className="dashboard-primary-link"
+                  <Button
                     to={`/learning-journey?pathway=${encodeURIComponent(pathway.id)}`}
+                    iconAfter={<ArrowRight size={18} />}
                   >
                     Open learning journey
-                    <ArrowRight size={18} aria-hidden="true" />
-                  </Link>
+                  </Button>
                 </div>
               </div>
             </article>

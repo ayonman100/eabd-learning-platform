@@ -2,12 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   Accessibility,
+  ChevronDown,
+  ClipboardCheck,
   Contrast,
+  LayoutGrid,
+  LogOut,
   Menu,
   Moon,
   Pause,
   Play,
+  Route,
+  Settings,
   Sun,
+  UserRound,
   Volume2,
   VolumeX,
   X,
@@ -57,6 +64,7 @@ export default function SiteHeader() {
 
   const [overrides, setOverrides] = useState(loadStoredSettings);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [learningMenuOpen, setLearningMenuOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -64,6 +72,8 @@ export default function SiteHeader() {
 
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
+  const menuTriggerRef = useRef(null);
+  const menuWrapRef = useRef(null);
   const utteranceRef = useRef(null);
 
   // The record is the source of truth once it has loaded; local storage keeps
@@ -168,6 +178,9 @@ export default function SiteHeader() {
       if (panelOpen) {
         setPanelOpen(false);
         toggleRef.current?.focus();
+      } else if (learningMenuOpen) {
+        setLearningMenuOpen(false);
+        menuTriggerRef.current?.focus();
       } else if (menuOpen) {
         setMenuOpen(false);
       }
@@ -175,7 +188,21 @@ export default function SiteHeader() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [panelOpen, menuOpen]);
+  }, [panelOpen, learningMenuOpen, menuOpen]);
+
+  // A click outside the grouped menu closes it, as a menu should.
+  useEffect(() => {
+    if (!learningMenuOpen) return undefined;
+
+    function handlePointerDown(event) {
+      if (!menuWrapRef.current?.contains(event.target)) {
+        setLearningMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [learningMenuOpen]);
 
   const stopReading = useCallback(() => {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -284,36 +311,30 @@ export default function SiteHeader() {
 
   function closeMenu() {
     setMenuOpen(false);
+    setLearningMenuOpen(false);
   }
 
-  const learnerLinks = user ? (
-    <>
-      <NavLink to="/dashboard" onClick={closeMenu}>
-        Dashboard
-      </NavLink>
-      <NavLink to="/learning-journey" onClick={closeMenu}>
-        Journey
-      </NavLink>
-      <NavLink to="/profile" onClick={closeMenu}>
-        Profile
-      </NavLink>
-      <NavLink to="/account" onClick={closeMenu}>
-        Account
-      </NavLink>
-      {isSupervisor && (
-        <NavLink to="/supervisor" onClick={closeMenu}>
-          Supervisor
-        </NavLink>
-      )}
-      <button type="button" className="nav-signout" onClick={handleSignOut}>
-        Sign out
-      </button>
-    </>
-  ) : (
-    <NavLink className="nav-cta" to="/signin" onClick={closeMenu}>
-      Learner sign in
-    </NavLink>
-  );
+  function closeLearningMenu() {
+    setLearningMenuOpen(false);
+  }
+
+  // Signed-in destinations, grouped behind one menu control so the header stays
+  // short. Each entry carries an icon and a one-line hint.
+  const learningMenu = [
+    { to: "/dashboard", label: "Dashboard", hint: "Your next step", icon: LayoutGrid },
+    { to: "/learning-journey", label: "Learning journey", hint: "Weeks and tasks", icon: Route },
+    { to: "/profile", label: "Profile", hint: "What helps you learn", icon: UserRound },
+    { to: "/account", label: "Account", hint: "Sign-in and devices", icon: Settings },
+  ];
+
+  if (isSupervisor) {
+    learningMenu.push({
+      to: "/supervisor",
+      label: "Supervisor",
+      hint: "Review learner steps",
+      icon: ClipboardCheck,
+    });
+  }
 
   return (
     <header className="site-header">
@@ -323,41 +344,115 @@ export default function SiteHeader() {
 
       <div className="header-inner">
         <Link to="/" className="brand" aria-label="EABD home" onClick={closeMenu}>
-          <img
-            src="/EABD-LOGO.png"
-            alt="EABD, Empowering Ability Beyond Disability"
-          />
+          <img className="brand-mark" src="/EABD-mark.png" alt="" aria-hidden="true" />
+          <span className="brand-words">
+            <span className="brand-name">EABD</span>
+            <span className="brand-tagline">Empowering Ability</span>
+          </span>
         </Link>
 
-        <button
-          className="mobile-menu-toggle"
-          type="button"
-          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={menuOpen}
-          aria-controls="primary-navigation"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
+        {/* Signed out: the three public pages and one sign-in action. */}
         <nav
           id="primary-navigation"
           className={`primary-navigation${menuOpen ? " is-open" : ""}`}
           aria-label="Main navigation"
         >
-          <NavLink to="/" end onClick={closeMenu}>
-            Home
-          </NavLink>
-          <NavLink to="/about" onClick={closeMenu}>
-            About
-          </NavLink>
-          <NavLink to="/explore" onClick={closeMenu}>
-            Explore
-          </NavLink>
-          {learnerLinks}
+          {!user && (
+            <>
+              <NavLink to="/" end onClick={closeMenu}>
+                Home
+              </NavLink>
+              <NavLink to="/about" onClick={closeMenu}>
+                About
+              </NavLink>
+              <NavLink to="/explore" onClick={closeMenu}>
+                Explore
+              </NavLink>
+            </>
+          )}
+
+          {user && (
+            <div className="learning-menu-mobile">
+              {learningMenu.map((item) => (
+                <NavLink key={item.to} to={item.to} onClick={closeMenu}>
+                  <item.icon size={18} aria-hidden="true" />
+                  {item.label}
+                </NavLink>
+              ))}
+              <button type="button" className="nav-signout" onClick={handleSignOut}>
+                <LogOut size={18} aria-hidden="true" />
+                Sign out
+              </button>
+            </div>
+          )}
         </nav>
 
         <div className="header-tools">
+          {user ? (
+            <div className="learning-menu" ref={menuWrapRef}>
+              <button
+                ref={menuTriggerRef}
+                type="button"
+                className="learning-menu-trigger"
+                aria-expanded={learningMenuOpen}
+                aria-controls="learning-menu-panel"
+                aria-haspopup="true"
+                onClick={() => setLearningMenuOpen((open) => !open)}
+              >
+                <LayoutGrid size={18} aria-hidden="true" />
+                <span className="learning-menu-label">My learning</span>
+                <ChevronDown
+                  size={16}
+                  aria-hidden="true"
+                  className={`learning-menu-chevron${learningMenuOpen ? " is-open" : ""}`}
+                />
+              </button>
+
+              {learningMenuOpen && (
+                <div
+                  id="learning-menu-panel"
+                  className="learning-menu-panel"
+                  role="menu"
+                  aria-label="My learning"
+                >
+                  {learningMenu.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      role="menuitem"
+                      className="learning-menu-item"
+                      onClick={closeLearningMenu}
+                    >
+                      <item.icon size={18} aria-hidden="true" />
+                      <span>
+                        <span className="learning-menu-item-label">{item.label}</span>
+                        <span className="learning-menu-item-hint">{item.hint}</span>
+                      </span>
+                    </NavLink>
+                  ))}
+
+                  <div className="learning-menu-divider" role="separator" />
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="learning-menu-item learning-menu-signout"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut size={18} aria-hidden="true" />
+                    <span>
+                      <span className="learning-menu-item-label">Sign out</span>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <NavLink className="btn btn-primary nav-cta" to="/signin" onClick={closeMenu}>
+              Sign in
+            </NavLink>
+          )}
+
           <button
             ref={toggleRef}
             className="header-tool-button"
@@ -385,6 +480,17 @@ export default function SiteHeader() {
             ) : (
               <Moon size={20} aria-hidden="true" />
             )}
+          </button>
+
+          <button
+            className="mobile-menu-toggle"
+            type="button"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
+            aria-controls="primary-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>

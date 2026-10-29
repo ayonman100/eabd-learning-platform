@@ -6,17 +6,12 @@ import PersonFields from "../components/fields/PersonFields.jsx";
 import RoomFields from "../components/fields/RoomFields.jsx";
 import GoalFields from "../components/fields/GoalFields.jsx";
 import DisplaySettingsFields from "../components/fields/DisplaySettingsFields.jsx";
-import { ErrorMessage, StatusMessage } from "../components/ui/StatusBanner.jsx";
+import WizardShell from "../components/ui/WizardShell.jsx";
+import Button from "../components/ui/Button.jsx";
+import { StatusMessage } from "../components/ui/StatusBanner.jsx";
 import { deriveAdaptations, resolveSettings } from "../lib/adaptations.js";
 
-const PERSON_KEYS = [
-  "reported_diagnosis",
-  "gmfcs",
-  "macs",
-  "cfcs",
-  "vision",
-  "fatigue",
-];
+const PERSON_KEYS = ["reported_diagnosis", "gmfcs", "macs", "cfcs", "vision", "fatigue"];
 const ROOM_KEYS = [
   "device",
   "device_os",
@@ -36,43 +31,46 @@ const GOAL_KEYS = [
   "other_details",
 ];
 
+const SECTIONS = [
+  {
+    key: "person",
+    label: "Person",
+    hint: "What they can do",
+    title: "What can this person do?",
+    intro:
+      "Function levels shape the screen. The diagnosis is recorded as reported and never changes the interface.",
+    keys: PERSON_KEYS,
+  },
+  {
+    key: "room",
+    label: "Room",
+    hint: "Device and setting",
+    title: "Where does the learning happen?",
+    intro: "The equipment and setting change what makes a task possible.",
+    keys: ROOM_KEYS,
+  },
+  {
+    key: "goals",
+    label: "Goals",
+    hint: "What they want",
+    title: "What would you like to work towards?",
+    intro: "The goal leads. Support and adjustments follow it, not the other way round.",
+    keys: GOAL_KEYS,
+  },
+  {
+    key: "display",
+    label: "Display",
+    hint: "How it looks",
+    title: "How should the screen look?",
+    intro: "These are suggested from the record. Change anything that does not suit you.",
+    keys: [],
+  },
+];
+
 function extractSection(source, keys) {
   const result = {};
-  for (const key of keys) {
-    result[key] = source[key] ?? null;
-  }
+  for (const key of keys) result[key] = source[key] ?? null;
   return result;
-}
-
-/**
- * One titled section with its own Save button and its own status line.
- * Written once, used for all four sections.
- */
-function ProfileSection({ id, title, description, children, onSave, saving, status }) {
-  return (
-    <section className="profile-section" aria-labelledby={`${id}-heading`}>
-      <div className="profile-section-heading">
-        <h2 id={`${id}-heading`}>{title}</h2>
-        {description && <p>{description}</p>}
-      </div>
-
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          onSave();
-        }}
-      >
-        {children}
-
-        <div className="profile-section-actions">
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving..." : "Save this section"}
-          </button>
-          <StatusMessage>{status}</StatusMessage>
-        </div>
-      </form>
-    </section>
-  );
 }
 
 export default function Profile() {
@@ -80,141 +78,135 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const pathway = getPathwayOrFirst(searchParams.get("pathway"));
 
-  const [person, setPerson] = useState(() => extractSection(learner ?? {}, PERSON_KEYS));
-  const [room, setRoom] = useState(() => extractSection(learner ?? {}, ROOM_KEYS));
-  const [goals, setGoals] = useState(() => extractSection(learner ?? {}, GOAL_KEYS));
-  const [display, setDisplay] = useState(learner?.ui_settings ?? {});
-
-  const [savingKey, setSavingKey] = useState("");
-  const [status, setStatus] = useState({});
+  const [step, setStep] = useState(0);
+  const [drafts, setDrafts] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!learner) return;
-    setPerson(extractSection(learner, PERSON_KEYS));
-    setRoom(extractSection(learner, ROOM_KEYS));
-    setGoals(extractSection(learner, GOAL_KEYS));
-    setDisplay(learner.ui_settings ?? {});
+    setDrafts({
+      person: extractSection(learner, PERSON_KEYS),
+      room: extractSection(learner, ROOM_KEYS),
+      goals: extractSection(learner, GOAL_KEYS),
+      display: learner.ui_settings ?? {},
+    });
   }, [learner]);
 
-  const resolvedDisplay = resolveSettings(deriveAdaptations(learner), display);
+  const section = SECTIONS[step];
+  const draft = drafts[section?.key] ?? {};
 
-  const saveSection = useCallback(
-    async (key, patch, label) => {
-      setSavingKey(key);
-      setError("");
-      setStatus((current) => ({ ...current, [key]: "" }));
-
-      try {
-        await save(patch);
-        setStatus((current) => ({ ...current, [key]: `${label} saved.` }));
-      } catch (saveError) {
-        setError(saveError.message);
-      } finally {
-        setSavingKey("");
-      }
-    },
-    [save]
+  const derived = resolveSettings(
+    deriveAdaptations({ ...learner, ...(drafts.person ?? {}), ...(drafts.room ?? {}) }),
+    drafts.display ?? {}
   );
+
+  const saveStep = useCallback(async () => {
+    setSaving(true);
+    setError("");
+    setStatus("");
+
+    try {
+      const patch =
+        section.key === "display" ? { ui_settings: derived } : drafts[section.key];
+      await save(patch);
+      setStatus(`${section.label} saved.`);
+      setStep((current) => Math.min(current + 1, SECTIONS.length - 1));
+    } catch (saveError) {
+      setError(saveError.message);
+    } finally {
+      setSaving(false);
+    }
+  }, [section, drafts, derived, save]);
 
   if (loading) {
     return (
-      <main id="main-content" className="profile-page" aria-live="polite">
-        <p>Loading your profile...</p>
+      <main id="main-content" className="page" aria-live="polite">
+        <div className="page-inner">
+          <p>Loading your profile...</p>
+        </div>
       </main>
     );
   }
 
   if (!learner) {
     return (
-      <main id="main-content" className="profile-page">
-        <p role="status" className="status-message">
-          Finish setting up your record before editing your profile.
-        </p>
-        <p>
-          <a href="/onboarding">Continue setting up</a>
-        </p>
+      <main id="main-content" className="page" tabIndex="-1">
+        <div className="page-inner">
+          <p role="status" className="status-message">
+            Finish setting up the record before editing the profile.
+          </p>
+          <Button to="/onboarding">Continue setting up</Button>
+        </div>
       </main>
     );
   }
 
   const isGuardian = learner.relationship !== "self";
+  const isLast = step === SECTIONS.length - 1;
 
   return (
-    <main id="main-content" className="profile-page" tabIndex="-1">
-      <div className="profile-inner">
-        <header className="profile-intro">
-          <p className="auth-eyebrow">YOUR RECORD</p>
-          <h1>{isGuardian ? `Profile for ${learner.first_name}` : "Your profile"}</h1>
-          <p>
-            Change anything here at any time. Each section saves on its own, so
-            you can stop after any of them.
-          </p>
-          <p className="auth-help">Pathway: {pathway.title}</p>
-        </header>
-
-        <ErrorMessage>{error}</ErrorMessage>
-
-        <ProfileSection
-          id="profile-person"
-          title="Person"
-          description="What this person can do day to day. Function levels shape the screen; the diagnosis never does."
-          saving={savingKey === "person"}
-          status={status.person}
-          onSave={() => saveSection("person", person, "Person details")}
-        >
+    <main id="main-content" tabIndex="-1">
+      <WizardShell
+        eyebrow={isGuardian ? `Profile for ${learner.first_name}` : "Your record"}
+        steps={SECTIONS}
+        currentIndex={step}
+        title={section.title}
+        intro={section.intro}
+        error={error}
+        submitting={saving}
+        submitLabel={isLast ? "Save display settings" : "Save and continue"}
+        onBack={() => setStep((current) => Math.max(current - 1, 0))}
+        showBack={step > 0}
+        onSubmit={(event) => {
+          event.preventDefault();
+          saveStep();
+        }}
+        footer={
+          <div className="wizard-footer">
+            <StatusMessage>{status}</StatusMessage>
+            <p className="wizard-footer-note">
+              Pathway: {pathway.title}. Each step saves on its own.
+            </p>
+            <Button to="/dashboard" variant="quiet">
+              Back to dashboard
+            </Button>
+          </div>
+        }
+      >
+        {section.key === "person" && (
           <PersonFields
-            value={person}
-            onChange={setPerson}
+            value={draft}
+            onChange={(next) => setDrafts((current) => ({ ...current, person: next }))}
             idPrefix="profile-person"
           />
-        </ProfileSection>
+        )}
 
-        <ProfileSection
-          id="profile-room"
-          title="Room"
-          description="The equipment and setting the learning happens in."
-          saving={savingKey === "room"}
-          status={status.room}
-          onSave={() => saveSection("room", room, "Room details")}
-        >
-          <RoomFields value={room} onChange={setRoom} idPrefix="profile-room" />
-        </ProfileSection>
+        {section.key === "room" && (
+          <RoomFields
+            value={draft}
+            onChange={(next) => setDrafts((current) => ({ ...current, room: next }))}
+            idPrefix="profile-room"
+          />
+        )}
 
-        <ProfileSection
-          id="profile-goals"
-          title="Goal"
-          description="What you want to work towards, and what helps you take part."
-          saving={savingKey === "goals"}
-          status={status.goals}
-          onSave={() => saveSection("goals", goals, "Goal")}
-        >
+        {section.key === "goals" && (
           <GoalFields
-            value={goals}
-            onChange={setGoals}
+            value={draft}
+            onChange={(next) => setDrafts((current) => ({ ...current, goals: next }))}
             idPrefix="profile-goal"
           />
-        </ProfileSection>
+        )}
 
-        <ProfileSection
-          id="profile-display"
-          title="Display"
-          description="These settings are suggested from your answers and apply straight away."
-          saving={savingKey === "display"}
-          status={status.display}
-          onSave={() => saveSection("display", { ui_settings: resolvedDisplay }, "Display settings")}
-        >
+        {section.key === "display" && (
           <DisplaySettingsFields
-            value={resolvedDisplay}
-            onChange={setDisplay}
+            value={derived}
+            onChange={(next) => setDrafts((current) => ({ ...current, display: next }))}
             idPrefix="profile-display"
           />
-        </ProfileSection>
-
-        <p className="profile-back">
-          <a href="/dashboard">Back to your dashboard</a>
-        </p>
-      </div>
+        )}
+      </WizardShell>
     </main>
   );
 }

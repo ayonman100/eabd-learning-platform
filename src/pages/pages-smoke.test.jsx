@@ -212,22 +212,34 @@ describe("learner pages render", () => {
     expect(html).toContain("/profile");
   });
 
-  it("renders the profile with all four sections", async () => {
+  it("renders the profile as a stepped wizard", async () => {
     const html = await render(createElement(Profile), "/profile");
-    expect(html).toContain("Your profile");
-    expect(html).toContain("Person");
-    expect(html).toContain("Room");
-    expect(html).toContain("Goal");
-    expect(html).toContain("Display");
-    expect(html).toContain("Save this section");
+    // One step at a time, with the step list and the first step's title.
+    expect(html).toContain("Step 1 of 4");
+    expect(html).toContain("What can this person do?");
+    expect(html).toContain("Save and continue");
+    // Every step is named in the progress list, even when not shown.
+    for (const label of ["Person", "Room", "Goals", "Display"]) {
+      expect(html).toContain(label);
+    }
+    // Only the current step's fields are mounted.
+    expect(html).toContain("Diagnosis, as it was told to you");
+    expect(html).not.toContain("What device do you use?");
   });
 
-  it("renders the learning journey with weeks and the Canva action", async () => {
-    const html = await render(createElement(LearningJourney), "/learning-journey?pathway=canva-design-project");
-    expect(html).toContain("YOUR LEARNING JOURNEY");
-    expect(html).toContain("Start in Canva");
-    expect(html).toContain("WEEK 1");
+  it("renders the learning journey with collapsible weeks", async () => {
+    const html = await render(
+      createElement(LearningJourney),
+      "/learning-journey?pathway=canva-design-project"
+    );
+    expect(html).toContain("Your learning journey");
+    expect(html).toContain("Week 1");
     expect(html).toContain("Week 2");
+    // Collapsed weeks are real disclosure buttons with aria-expanded.
+    expect(html).toContain("aria-expanded");
+    expect(html).toContain("aria-controls");
+    // The primary submit action is present on the open week.
+    expect(html).toContain("Send for review");
   });
 
   it("renders the account page with sign out", async () => {

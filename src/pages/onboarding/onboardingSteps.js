@@ -1,11 +1,11 @@
 export const ONBOARDING_STEPS = [
-  { key: "who", label: "Who this record is for" },
-  { key: "document", label: "A document, if you have one" },
-  { key: "confirm", label: "Check suggested answers" },
-  { key: "person", label: "What you can do" },
-  { key: "room", label: "Your room and equipment" },
-  { key: "goals", label: "Your goal" },
-  { key: "display", label: "Your display" },
+  { key: "who", label: "Who", hint: "Whose record this is" },
+  { key: "document", label: "Document", hint: "Optional report" },
+  { key: "confirm", label: "Confirm", hint: "Check suggestions" },
+  { key: "person", label: "Person", hint: "What they can do" },
+  { key: "room", label: "Room", hint: "Device and setting" },
+  { key: "goals", label: "Goals", hint: "What they want" },
+  { key: "display", label: "Display", hint: "How it looks" },
 ];
 
 export function stepIndex(stepKey) {
