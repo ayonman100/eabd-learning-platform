@@ -36,7 +36,58 @@ written in the config next to the override.
 
 ## Unit and component tests
 
-Vitest with a jsdom environment. Test files sit beside the code as `*.test.js` or `*.test.jsx`.
+Vitest 4 runs in jsdom. `vitest.config.js` collects `src/**/*.test.{js,jsx}` and
+`scripts/**/*.test.js`. A test file sits next to the code it covers, except the commit
+message checker, which lives under `scripts/` with the hook it protects.
+
+### How to run them
+
+```bash
+npm test
+npx vitest run src/utils/progress.test.js
+npm run test:watch
+```
+
+`npm test` runs the suite once and exits. Pass a path to run one file. Watch mode reruns
+the affected file when it changes. The suite needs no Supabase credentials and no browser.
+
+### What belongs in a unit test
+
+Test a rule that can be wrong without the screen showing it. That is a pure function, a
+validation contract, a date or error translation, or a structural promise such as "every
+theme defines the same tokens".
+
+Add the test in the same change as the function. Name the file after the module:
+`progress.js` is covered by `progress.test.js`. Use `describe` for the module and `it`
+for one behaviour. The sentence in `it` should say what the caller can rely on.
+
+```js
+import { describe, expect, it } from "vitest";
+import { getWeekStatus } from "./progress.js";
+
+describe("getWeekStatus", () => {
+  it("locks the next week until the previous week is submitted", () => {
+    expect(getWeekStatus(pathway, rows, 1)).toBe("locked");
+  });
+});
+```
+
+Mock only at the boundary. A pure function should receive plain objects, not a fake
+Supabase client. When a test does need a module mock, use `vi.mock` and return the
+smallest shape the page reads.
+
+### Page smoke tests
+
+`src/pages/pages-smoke.test.jsx` renders pages with `react-dom/client` into jsdom and
+checks the text and accessible names a person would see. Auth, the learner record, and
+the database modules are mocked, so the test proves the page can render. It does not
+prove a click writes a row.
+
+Use a smoke test when a page's important copy or structure would be easy to drop: one
+`h1`, the account-type choice, a collapsible week, a legal warning. Extract a new pure
+function, and test that function, when the page grows a rule of its own.
+
+### The current suite
 
 | File | Covers |
 | --- | --- |
@@ -45,26 +96,18 @@ Vitest with a jsdom environment. Test files sit beside the code as `*.test.js` o
 | `src/lib/adaptations.test.js` | Derived settings for three sample learners, the diagnosis-only case, target size never lowering, override precedence |
 | `src/lib/extraction.test.js` | The validation contract: sample, unknown key, level 6, fractional level, missing evidence, malformed payload, flat payload |
 | `src/utils/progress.test.js` | Week availability, unlocking on submission, re-locking after a "not yet" review, summary counts, next task |
+| `src/styles/themes.test.js` | Every theme defines the same tokens, and colour values stay on those tokens |
 | `src/components/ui/auth-components.test.jsx` | `PasswordField` labelling and toggle state, `StatusBanner` roles |
-
-Run one file:
-
-```bash
-npx vitest run src/utils/progress.test.js
-```
-
-Watch mode:
-
-```bash
-npm run test:watch
-```
+| `src/pages/pages-smoke.test.jsx` | Public, learner, supervisor, and unknown routes render their real content with mocked data |
+| `scripts/commit-message.test.js` | The commit message shape enforced by Husky |
 
 ### What is deliberately not unit tested
 
-Pages are covered by the gates above and by manual rehearsal, not by component tests, because
-their behaviour is mostly orchestration of the data layer. The valuable tests are the pure rules:
-week locking, adaptation derivation, and the extraction contract. If a page grows a rule of its
-own, extract the rule and test it.
+Row level security is checked by `scripts/rls-check.mjs` against a real project, because
+a mock would only repeat the policy text. A signed-in journey through onboarding,
+submission, and review is the manual rehearsal at the end of this guide, plus the
+browser pass. Those two cover the paths a unit test cannot reach without pretending
+the database said yes.
 
 ## The RLS check
 
