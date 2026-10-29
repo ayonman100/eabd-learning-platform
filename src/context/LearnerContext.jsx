@@ -9,6 +9,7 @@ import {
 import { useAuth } from "./AuthContext.jsx";
 import { getMyLearner, updateLearner } from "../lib/db/learners.js";
 import { isSupervisor } from "../lib/db/supervisors.js";
+import { isPlatformAdmin } from "../lib/db/admin.js";
 
 const LearnerContext = createContext(null);
 
@@ -16,6 +17,7 @@ const EMPTY_RECORD = {
   userId: null,
   learner: null,
   supervisor: false,
+  admin: false,
   error: "",
 };
 
@@ -42,13 +44,14 @@ export function LearnerProvider({ children }) {
 
     let active = true;
 
-    Promise.all([getMyLearner(), isSupervisor()])
-      .then(([nextLearner, nextSupervisor]) => {
+    Promise.all([getMyLearner(), isSupervisor(), isPlatformAdmin()])
+      .then(([nextLearner, nextSupervisor, nextAdmin]) => {
         if (!active) return;
         setRecord({
           userId,
           learner: nextLearner,
           supervisor: nextSupervisor,
+          admin: nextAdmin,
           error: "",
         });
       })
@@ -58,6 +61,7 @@ export function LearnerProvider({ children }) {
           userId,
           learner: null,
           supervisor: false,
+          admin: false,
           error: loadError.message,
         });
       });
@@ -72,20 +76,23 @@ export function LearnerProvider({ children }) {
   const learner = isCurrentUser ? record.learner : null;
   const error = isCurrentUser ? record.error : "";
   const supervisor = isCurrentUser ? record.supervisor : false;
+  const admin = isCurrentUser ? record.admin : false;
   const loading = authLoading || (Boolean(userId) && !isCurrentUser);
 
   const refresh = useCallback(async () => {
     if (!userId) return null;
 
     try {
-      const [nextLearner, nextSupervisor] = await Promise.all([
+      const [nextLearner, nextSupervisor, nextAdmin] = await Promise.all([
         getMyLearner(),
         isSupervisor(),
+        isPlatformAdmin(),
       ]);
       setRecord({
         userId,
         learner: nextLearner,
         supervisor: nextSupervisor,
+        admin: nextAdmin,
         error: "",
       });
       return nextLearner;
@@ -94,6 +101,7 @@ export function LearnerProvider({ children }) {
         userId,
         learner: null,
         supervisor: false,
+        admin: false,
         error: loadError.message,
       });
       return null;
@@ -122,8 +130,9 @@ export function LearnerProvider({ children }) {
       refresh,
       save,
       isSupervisor: supervisor,
+      isAdmin: admin,
     }),
-    [learner, loading, error, refresh, save, supervisor]
+    [learner, loading, error, refresh, save, supervisor, admin]
   );
 
   return (

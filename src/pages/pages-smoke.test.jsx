@@ -89,6 +89,7 @@ const learnerValue = {
   refresh: vi.fn(),
   save: vi.fn(),
   isSupervisor: false,
+  isAdmin: false,
 };
 
 vi.mock("../context/AuthContext.jsx", () => ({
@@ -144,6 +145,9 @@ import Account from "./Account.jsx";
 import OnboardingFlow from "./onboarding/OnboardingFlow.jsx";
 import SupervisorHome from "./supervisor/SupervisorHome.jsx";
 import SupervisorLearner from "./supervisor/SupervisorLearner.jsx";
+import Glossary from "./legal/Glossary.jsx";
+import Terms from "./legal/Terms.jsx";
+import Privacy from "./legal/Privacy.jsx";
 import App from "../App.jsx";
 
 async function render(element, route = "/") {
@@ -205,6 +209,26 @@ describe("public pages render", () => {
     expect(html).toContain("Myself");
     expect(html).toContain("Someone I support");
     expect(html).toContain("at least 8 characters");
+  });
+
+  it("renders the glossary and explains that partner is not pattern", async () => {
+    const html = await render(createElement(Glossary), "/glossary");
+    expect(html).toContain("Glossary");
+    expect(html).toContain("Communication partner");
+    // The glossary must settle the wording question in the product itself.
+    expect(html).toContain("not pattern");
+  });
+
+  it("renders the terms of use with a pilot warning", async () => {
+    const html = await render(createElement(Terms), "/terms");
+    expect(html).toContain("Terms of use");
+    expect(html).toContain("Pilot draft");
+  });
+
+  it("renders the privacy notice", async () => {
+    const html = await render(createElement(Privacy), "/privacy");
+    expect(html).toContain("Privacy notice");
+    expect(html).toContain("Health and disability information");
   });
 });
 

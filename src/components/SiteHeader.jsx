@@ -12,6 +12,7 @@ import {
   Play,
   Route,
   Settings,
+  ShieldCheck,
   Sun,
   UserRound,
   Volume2,
@@ -59,7 +60,7 @@ function pickDisplaySettings(overrides) {
 
 export default function SiteHeader() {
   const { user, signOut } = useAuth();
-  const { learner, isSupervisor } = useLearner();
+  const { learner, isSupervisor, isAdmin } = useLearner();
 
   const [overrides, setOverrides] = useState(loadStoredSettings);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -350,6 +351,15 @@ export default function SiteHeader() {
       label: "Supervisor",
       hint: "Review learner steps",
       icon: ClipboardCheck,
+    });
+  }
+
+  if (isAdmin) {
+    learningMenu.push({
+      to: "/admin",
+      label: "Administration",
+      hint: "Learners and approvals",
+      icon: ShieldCheck,
     });
   }
 

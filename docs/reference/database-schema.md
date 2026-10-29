@@ -1,7 +1,9 @@
 # Database schema reference
 
-Source of truth: `supabase/migrations/20261028000000_learner_record.sql`.
-Apply with `npx supabase db push`.
+Source of truth: `supabase/migrations/`. The learner record is
+`20261028000000_learner_record.sql`. Platform administration is
+`20261029100000_platform_admin.sql`. The supervisors-to-profiles foreign key is
+`20261029120000_supervisors_profile_fk.sql`. Apply with `npx supabase db push`.
 
 ## Entity overview
 
@@ -64,8 +66,39 @@ insert.
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| `user_id` | uuid, primary key | References `auth.users(id)` |
+| `user_id` | uuid, primary key | References `auth.users(id)` and `profiles(id)` |
 | `created_at` | timestamptz, not null | |
+
+`supervisors_profile_fk` is what lets a query embed a profile name from a supervisor row.
+Deleting the profile removes the supervisor role.
+
+## `public.platform_admins`
+
+The EABD team role. Granted in the SQL editor. There is no insert policy for ordinary users.
+The only select policy returns the caller's own row.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `user_id` | uuid, primary key | References `auth.users(id)` with `on delete cascade` |
+| `created_at` | timestamptz, not null | |
+
+## `public.admin_audit`
+
+Append-only record of administrative actions that are not already a review. Readable by
+admins. The actor inserts their own row. There is no update or delete policy.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid, primary key | |
+| `actor_id` | uuid, not null | The admin who acted |
+| `action` | text, not null | `review_created`, `learner_assigned`, `learner_unassigned`, `supervisor_granted`, `supervisor_revoked`, `document_deleted` |
+| `learner_id` | uuid | Set null if the learner is later deleted |
+| `target_user_id` | uuid | The other account, when the action has one |
+| `detail` | jsonb, not null | A small payload, default `{}` |
+| `created_at` | timestamptz, not null | |
+
+Who may read and write each table is described in
+[administration.md](administration.md).
 
 ## `public.learners`
 
@@ -169,6 +202,7 @@ Index `task_reviews_lookup` on `(learner_id, pathway_id, task_id, created_at des
 | Function | Returns | Notes |
 | --- | --- | --- |
 | `is_supervisor()` | boolean | `security definer`, stable |
+| `is_platform_admin()` | boolean | `security definer`, stable. True when `auth.uid()` is in `platform_admins` |
 | `owns_learner(uuid)` | boolean | `security definer`, stable |
 | `supervises_learner(uuid)` | boolean | `security definer`, stable |
 | `owns_learner_path(text)` | boolean | Storage path variant, compares text to avoid a cast error |

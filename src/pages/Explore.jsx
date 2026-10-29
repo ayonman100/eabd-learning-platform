@@ -100,11 +100,29 @@ export default function Explore() {
       </Section>
 
       <Section tone="violet">
-        <SectionHeading
-          eyebrow="How it works"
-          title="Your pathway should work for you."
-          lead="EABD starts with your interests, understands your current position, and works with you to identify barriers, useful resources, support, and practical next steps. Accessibility needs inform how you participate, not what you are allowed to aspire to."
-        />
+        <div className="split split-reverse">
+          <div className="split-copy">
+            <SectionHeading
+              eyebrow="How it works"
+              title="Your pathway should work for you."
+              lead="EABD starts with your interests, understands your current position, and works with you to identify barriers, useful resources, support, and practical next steps. Accessibility needs inform how you participate, not what you are allowed to aspire to."
+            />
+          </div>
+
+          <figure className="media-figure split-media">
+            <img
+              src="/images/eabd-learning-at-desk.jpg"
+              alt="A person working on a design project at a desk with a large screen"
+              width="1400"
+              height="1050"
+              loading="lazy"
+            />
+            <figcaption>
+              The pilot pathway is a real project: a finished design with a purpose, reviewed by a
+              supervisor.
+            </figcaption>
+          </figure>
+        </div>
 
         <CardGrid columns={3}>
           <FeatureCard title="Start with the person" icon={<Sparkles size={20} aria-hidden="true" />}>

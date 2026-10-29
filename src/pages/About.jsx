@@ -165,8 +165,8 @@ export default function About() {
       </Section>
 
       <Section labelledBy="pilot-heading">
-        <div className="two-column">
-          <div className="two-column-copy">
+        <div className="split">
+          <div className="split-copy">
             <SectionHeading
               eyebrow="A practical start"
               title="Learning through meaningful projects."
@@ -190,6 +190,20 @@ export default function About() {
               </Button>
             </p>
           </div>
+
+          <figure className="media-figure split-media">
+            <img
+              src="/images/eabd-mentor-support.jpg"
+              alt="A mentor and a young person looking at a tablet together and smiling"
+              width="1400"
+              height="1050"
+              loading="lazy"
+            />
+            <figcaption>
+              A supervisor reviews each step and records what made it possible, so progress is
+              recognised rather than assumed.
+            </figcaption>
+          </figure>
 
           <aside className="pilot-card" aria-label="Current pilot">
             <span className="pill pill-waiting">Current pilot</span>

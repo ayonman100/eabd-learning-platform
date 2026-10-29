@@ -16,8 +16,12 @@ Defined in `src/App.jsx`.
 | `/profile` | `Profile` | `ProtectedRoute` | Edit person, room, goal, and display |
 | `/learning-journey` | `LearningJourney` | `ProtectedRoute` | Weeks, Canva handoff, submission |
 | `/account` | `Account` | `ProtectedRoute` | Passkeys and sign out |
+| `/glossary` | `Glossary` | public | Terms used on the site, including clinical scales |
+| `/terms` | `Terms` | public | Terms of use for the pilot |
+| `/privacy` | `Privacy` | public | What the pilot stores and who can see it |
 | `/supervisor` | `SupervisorHome` | `SupervisorRoute` | Learners awaiting review |
 | `/supervisor/learners/:learnerId` | `SupervisorLearner` | `SupervisorRoute` | Record, submissions, and the review form |
+| `/admin` | `AdminHome` | `AdminRoute` | Approval queue, every learner, and the audit trail |
 | `*` | inline `NotFound` | public | 404 with two ways back |
 
 Query parameters:
@@ -32,15 +36,19 @@ Query parameters:
 | --- | --- | --- |
 | `ProtectedRoute` | `src/components/ProtectedRoute.jsx` | Shows a polite loading page while auth or the learner record resolves, redirects to `/signin` with the intended location, otherwise renders the child route |
 | `SupervisorRoute` | `src/components/SupervisorRoute.jsx` | The same, plus a clear "this area is for supervisors" page when the account has no supervisor role |
+| `AdminRoute` | `src/components/AdminRoute.jsx` | Redirects a signed-out visitor to `/signin`. The page itself checks `platform_admins`, because row level security is the real gate |
 
-Both guards wait for `LearnerContext.loading` to be false, so a child page never mounts with an
-empty record.
+`ProtectedRoute` and `SupervisorRoute` wait for `LearnerContext.loading` to be false, so a
+child page never mounts with an empty record. `AdminRoute` waits for auth only. `AdminHome`
+then checks the admin role and shows a clear refusal when the account does not hold it.
 
 ## Layout
 
-There is one layout: `SiteHeader` renders above the route table in `App.jsx`. Each page
-renders its own `main` element with `id="main-content"`. There is no page footer component;
-the footer content lives inside the pages that need it.
+`SiteHeader` renders above the route table in `App.jsx`. Each page renders its own `main`
+element with `id="main-content"`. `SiteFooter` renders under the routes on the public pages
+only: home, about, explore, sign-in, sign-up, glossary, terms, and privacy. Signed-in
+learning pages leave it out so the marketing links do not compete with the learner's own
+navigation. The header shows Administration inside My learning when `isAdmin` is true.
 
 ## Reusable components
 
@@ -87,10 +95,9 @@ model. If a third surface needs it, promote it to `ui/`.
 
 | File | Scope |
 | --- | --- |
-| `src/index.css` | Tokens, themes, shared form styles, onboarding, dashboard, profile, supervisor, review, and journey |
+| `src/index.css` | Tokens, themes, shared layout, public pages, footer, legal pages, administration, onboarding, dashboard, profile, supervisor, review, and journey |
 | `src/styles/accessibility.css` | Skip link, global focus ring, visually hidden helper. Loaded after `index.css` |
 | `src/components/Navbar.css` | Header and the display panel |
-| `src/pages/*.css` | Marketing pages: Home, About, Explore |
 
 Class naming is plain and page-prefixed (`dashboard-`, `profile-`, `learning-`, `supervisor-`,
 `onboarding-`). There is no CSS-in-JS and no utility framework, so a class in a component

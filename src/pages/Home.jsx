@@ -139,25 +139,39 @@ export default function Home() {
       </section>
 
       <Section tone="violet" labelledBy="intro-heading">
-        <div className="two-column">
-          <div>
+        <div className="split">
+          <div className="split-copy">
             <SectionHeading
               eyebrow="A different starting point"
               title="Start with the person. Not the limitation."
               id="intro-heading"
             />
+            <div className="prose">
+              <p>
+                A disability should not decide what someone is allowed to aspire to. The starting
+                point is the person's own interest, goal and preferred direction.
+              </p>
+              <p>
+                EABD works with each learner to understand what stands between them and that goal,
+                then explore practical ways forward while keeping the real-world task and its
+                essential standards in view.
+              </p>
+            </div>
           </div>
-          <div className="prose">
-            <p>
-              A disability should not decide what someone is allowed to aspire to. The starting
-              point is the person's own interest, goal and preferred direction.
-            </p>
-            <p>
-              EABD works with each learner to understand what stands between them and that goal,
-              then explore practical ways forward while keeping the real-world task and its
-              essential standards in view.
-            </p>
-          </div>
+
+          <figure className="media-figure split-media">
+            <img
+              src="/images/eabd-collaboration.jpg"
+              alt="Three young people working together at a table with paper, pencils and a laptop"
+              width="1600"
+              height="900"
+              loading="lazy"
+            />
+            <figcaption>
+              Learning happens with people, not alone. Every pathway is adapted around the person
+              taking it.
+            </figcaption>
+          </figure>
         </div>
       </Section>
 

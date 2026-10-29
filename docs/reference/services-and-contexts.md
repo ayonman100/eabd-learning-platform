@@ -72,6 +72,28 @@ before it calls the database, so the failure message is specific.
 | --- | --- |
 | `isSupervisor()` | `true` when the caller has a `supervisors` row. Never throws; a failure returns `false` and logs |
 
+## `src/lib/db/admin.js`
+
+Called only from the administration page and from `LearnerContext` when deciding whether
+to show the Administration entry. A failure on the role check returns `false` and logs.
+The other functions throw a safe sentence through `unwrap`.
+
+| Function | Returns |
+| --- | --- |
+| `isPlatformAdmin()` | `true` when the caller has a `platform_admins` row |
+| `listAllLearners()` | Every learner, with started, submitted, and reviewed counts |
+| `listAwaitingReview()` | Steps in `submitted`, oldest first |
+| `listAudit(limit)` | Recent `admin_audit` rows, newest first |
+| `recordAudit({ action, learnerId, targetUserId, detail })` | Writes one audit row. A failed write is logged and does not throw |
+| `listSupervisors()` | Supervisor ids with profile names |
+| `listAssignments()` | Learner and supervisor pairs |
+| `assignSupervisor(learnerId, supervisorId)` | The inserted assignment |
+| `unassignSupervisor(learnerId, supervisorId)` | Removes that pair |
+| `grantSupervisor(userId)` | Inserts a `supervisors` row |
+
+The role itself is granted in the SQL editor. There is no client insert policy on
+`platform_admins`. See [administration.md](administration.md).
+
 ## `src/lib/adaptations.js`
 
 | Export | Purpose |
@@ -160,9 +182,10 @@ Every function is memoised, so including one in a dependency array is safe.
 | `learner` | The signed-in account's learner row, or null |
 | `loading` | Auth still resolving, or the record for this user has not arrived |
 | `error` | A safe message when the record could not be loaded |
-| `refresh()` | Reloads the record and the supervisor role |
+| `refresh()` | Reloads the record, the supervisor role, and the admin role |
 | `save(patch)` | Writes a patch and updates the cached record |
 | `isSupervisor` | Whether the account holds the supervisor role |
+| `isAdmin` | Whether the account holds the platform admin role |
 
 `loading` is derived rather than set in an effect: it stays true until there is a record whose
 `userId` matches the current user. That is what prevents a page from acting on an empty
