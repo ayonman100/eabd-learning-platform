@@ -7,32 +7,39 @@ requirements that every screen meets.
 ## Design tokens
 
 All colour comes from custom properties on `:root` in `src/index.css`. There is no
-hardcoded colour in a component.
+hardcoded colour in a component, and a test in `src/styles/themes.test.js` fails if one
+is introduced.
 
 | Token | Purpose |
 | --- | --- |
-| `--color-primary` | Primary text on light surfaces, primary button background |
-| `--color-secondary` | Accent for eyebrow text, focus details, and active states |
+| `--color-primary` | Violet from the wheelchair figure, at full vibrancy. 6.23:1 on white |
+| `--color-primary-strong` | Pressed states and headings |
+| `--color-primary-soft` | Selected rows, active pill background |
+| `--color-secondary` | Deep teal. 6.06:1, safe for text |
+| `--color-secondary-bright` | Decorative teal only, never text |
+| `--color-tertiary` / `--color-tertiary-bright` | Amber from the star. Deep for text, bright for fills |
 | `--color-background` / `--color-surface` | Page and card surfaces |
-| `--color-text` / `--color-muted` | Body and secondary text |
+| `--color-text` / `--color-muted` | 17.6:1 and 7.0:1 |
 | `--color-border` / `--color-hover` | Hairlines and hover fills |
-| `--color-focus` | Focus ring colour |
-| `--color-success-*` | Confirmed, saved, reviewed |
-| `--color-warning-*` | Waiting, sent back, attention needed |
-| `--color-danger-*` | Errors and destructive warnings |
+| `--color-focus` | Focus ring |
+| `--color-success-*` / `--color-warning-*` / `--color-danger-*` | Status surfaces and text |
+| `--tint-violet` / `--tint-teal` / `--tint-amber` | Section band backgrounds |
+| `--hero-*` | Everything drawn over the homepage film |
 
-Four themes are defined by swapping tokens only:
+### Why the brights are separate tokens
 
-| Theme | Selector |
-| --- | --- |
-| Light | `:root` |
-| Dark | `:root[data-theme="dark"]` |
-| High contrast (light) | `:root.a11y-high-contrast` |
-| High contrast (dark) | `:root[data-theme="dark"].a11y-high-contrast` |
+Canva's palette is vivid, and two of its signature colours fail contrast badly: its teal is
+2.15:1 on white and its amber is also 2.15:1. So each hue exists twice: a readable shade for
+text and button fills, and a `-bright` shade for decoration. The brights are never used for
+text. The violet is the exception: Canva's own purple passes at 6.23:1, so the primary is the
+genuinely vibrant one.
 
-`SiteHeader` sets `data-theme` from the resolved settings, and applies the `a11y-*` class
-list returned by `settingsToClasses`. A new colour must therefore be added to all four
-blocks, or it will fail in at least one theme.
+### The hero tokens
+
+The homepage puts text over a photograph, which is the hardest case for contrast. Rather
+than hardcoding white and a dark scrim, the hero reads `--hero-*` tokens. High contrast
+sets the scrim to solid white and hides the video entirely, so no text sits over an image.
+This is what the `themes.test.js` guard protects.
 
 ## The adaptation engine
 
@@ -77,6 +84,10 @@ the diagnosis-only case, and override precedence.
 - The onboarding step heading takes focus on every step change, so a screen reader announces
   the new question.
 - The display panel closes on Escape and returns focus to the control that opened it.
+- The display panel also closes on a click outside it, and opening the learning menu closes
+  it. Only one surface is open at a time.
+- Every switch row is a real checkbox whose input covers the whole row, so the label is part
+  of the target and the visible switch is decorative.
 - No focus trap exists, because no modal dialog is used.
 
 ### Keyboard and pointer targets
