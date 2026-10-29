@@ -1,22 +1,19 @@
-
-import { Link } from "react-router-dom";
+import { ArrowRight, Compass, HeartHandshake, Lightbulb, Route, Target, Wrench } from "lucide-react";
+import Button from "../components/ui/Button.jsx";
 import {
-  ArrowRight,
-  Compass,
-  HeartHandshake,
-  Lightbulb,
-  Route,
-  Target,
-  Wrench,
-} from "lucide-react";
-import "./About.css";
+  CallToAction,
+  CardGrid,
+  FeatureCard,
+  PageHero,
+  Section,
+  SectionHeading,
+} from "../components/ui/PageSections.jsx";
 
-const processSteps = [
+const PROCESS_STEPS = [
   {
     number: "01",
     title: "Discover",
-    description:
-      "Start with the person's interests, ambitions, and what they want to achieve.",
+    description: "Start with the person's interests, ambitions, and what they want to achieve.",
     icon: Compass,
   },
   {
@@ -50,8 +47,7 @@ const processSteps = [
   {
     number: "06",
     title: "Build",
-    description:
-      "Develop relevant skills, practical experience, and evidence of progress.",
+    description: "Develop relevant skills, practical experience, and evidence of progress.",
     icon: Wrench,
   },
   {
@@ -63,224 +59,176 @@ const processSteps = [
   },
 ];
 
+const PRINCIPLES = [
+  {
+    title: "Person-led by choice",
+    description:
+      "The learner's interests and goals guide the direction. Support should help people pursue meaningful ambitions, not replace their choices.",
+  },
+  {
+    title: "Inclusive by design",
+    description:
+      "Accessibility and participation needs are considered when shaping how a person learns, practises, and demonstrates what they can do.",
+  },
+  {
+    title: "Connected to opportunity",
+    description:
+      "Learning is a step towards practical possibilities, including employment, self-employment, entrepreneurship, freelancing, and further education.",
+  },
+];
+
 export default function About() {
   return (
-    <main id="main-content" className="about-page" tabIndex="-1">
-      <section className="about-hero">
-        <div className="about-container about-hero-grid">
-          <div className="about-hero-copy">
-            <p className="about-eyebrow">ABOUT EABD</p>
-
-            <h1>
-              Your ability deserves a pathway, not a predetermined limit.
-            </h1>
-
-            <p className="about-hero-description">
-              Empowering Ability Beyond Disability (EABD) helps people
-              identify and address the barriers between their interests
-              and the goals they want to pursue.
-            </p>
-
-            <div className="about-hero-actions">
-              <Link to="/explore" className="about-primary-link">
-                Explore learning pathways
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-
-              <Link to="/signup" className="about-text-link">
-                Get started
-              </Link>
-            </div>
+    <main id="main-content" tabIndex="-1">
+      <PageHero
+        eyebrow="About EABD"
+        title="Your ability deserves a pathway, not a predetermined limit."
+        lead="Empowering Ability Beyond Disability helps people identify and address the barriers between their interests and the goals they want to pursue."
+        actions={
+          <>
+            <Button to="/explore" iconAfter={<ArrowRight size={18} />}>
+              Explore learning pathways
+            </Button>
+            <Button to="/signup" variant="secondary">
+              Get started
+            </Button>
+          </>
+        }
+        aside={
+          <div className="principle-mark">
+            <HeartHandshake size={40} strokeWidth={1.5} aria-hidden="true" />
+            <p>Ability beyond barriers</p>
+            <ul>
+              <li>Your interests</li>
+              <li>Your pathway</li>
+              <li>Your goals</li>
+            </ul>
           </div>
+        }
+      />
 
-          <div className="about-hero-art" aria-hidden="true">
-            <div className="about-art-orbit about-art-orbit-one" />
-            <div className="about-art-orbit about-art-orbit-two" />
-
-            <div className="about-art-center">
-              <HeartHandshake size={48} strokeWidth={1.5} />
-              <span>Ability beyond barriers</span>
-            </div>
-
-            <span className="about-art-label about-art-label-one">
-              Your interests
-            </span>
-            <span className="about-art-label about-art-label-two">
-              Your pathway
-            </span>
-            <span className="about-art-label about-art-label-three">
-              Your goals
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <section className="about-principle">
-        <div className="about-container about-principle-inner">
-          <p className="about-eyebrow">OUR GUIDING PRINCIPLE</p>
-
-          <h2>
-            Disability informs the accommodation.
-            <span> Interest informs the pathway.</span>
-          </h2>
-
+      <Section tone="surface" labelledBy="principle-heading">
+        <SectionHeading
+          eyebrow="Our guiding principle"
+          title="Disability informs the accommodation. Interest informs the pathway."
+          id="principle-heading"
+          align="center"
+        />
+        <div className="prose prose-center">
           <p>
-            A person's disability should not automatically determine what
-            they can learn or aspire to do. We begin with the person's
-            chosen interest, then work to understand what support,
-            resources, skills, and accessible approaches may help them
-            pursue it.
+            A person's disability should not automatically determine what they can learn or aspire
+            to do. We begin with the person's chosen interest, then work to understand what support,
+            resources, skills, and accessible approaches may help them pursue it.
           </p>
         </div>
-      </section>
+      </Section>
 
-      <section className="about-approach">
-        <div className="about-container">
-          <div className="about-section-heading">
-            <p className="about-eyebrow">OUR APPROACH</p>
+      <Section labelledBy="approach-heading">
+        <SectionHeading
+          eyebrow="Our approach"
+          title="Start with the person. Work towards the goal."
+          lead="Every person has a different starting point. EABD uses a structured process to explore practical ways forward, rather than expecting everyone to follow an identical route."
+          id="approach-heading"
+        />
 
-            <h2>Start with the person. Work towards the goal.</h2>
+        <CardGrid columns={4}>
+          {PROCESS_STEPS.map((step) => {
+            const Icon = step.icon;
+            return (
+              <FeatureCard
+                key={step.number}
+                number={step.number}
+                title={step.title}
+                icon={<Icon size={20} strokeWidth={1.8} aria-hidden="true" />}
+              >
+                <p>{step.description}</p>
+              </FeatureCard>
+            );
+          })}
+        </CardGrid>
+      </Section>
 
-            <p>
-              Every person has a different starting point. EABD uses a
-              structured process to explore practical ways forward,
-              rather than expecting everyone to follow an identical route.
-            </p>
-          </div>
+      <Section tone="surface" labelledBy="principles-heading">
+        <SectionHeading
+          eyebrow="What guides us"
+          title="Inclusion by design. Choice at the centre."
+          id="principles-heading"
+        />
 
-          <div className="about-process-grid">
-            {processSteps.map((step) => {
-              const StepIcon = step.icon;
+        <CardGrid columns={3}>
+          {PRINCIPLES.map((principle) => (
+            <FeatureCard key={principle.title} title={principle.title}>
+              <p>{principle.description}</p>
+            </FeatureCard>
+          ))}
+        </CardGrid>
+      </Section>
 
-              return (
-                <article className="about-process-card" key={step.number}>
-                  <div className="about-process-card-top">
-                    <span className="about-step-number">
-                      {step.number}
-                    </span>
-
-                    <span className="about-step-icon" aria-hidden="true">
-                      <StepIcon size={22} strokeWidth={1.8} />
-                    </span>
-                  </div>
-
-                  <h3>{step.title}</h3>
-                  <p>{step.description}</p>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="about-difference">
-        <div className="about-container about-difference-grid">
-          <div>
-            <p className="about-eyebrow">WHAT GUIDES US</p>
-            <h2>Inclusion by design. Choice at the centre.</h2>
-          </div>
-
-          <div className="about-difference-content">
-            <article>
-              <h3>Person-led by choice</h3>
+      <Section labelledBy="pilot-heading">
+        <div className="two-column">
+          <div className="two-column-copy">
+            <SectionHeading
+              eyebrow="A practical start"
+              title="Learning through meaningful projects."
+              id="pilot-heading"
+            />
+            <div className="prose">
               <p>
-                The learner's interests and goals guide the direction.
-                Support should help people pursue meaningful ambitions,
-                not replace their choices.
+                EABD is developing its approach through practical, interest-led learning. The current
+                pilot focuses on a Canva design project, giving a learner the opportunity to work
+                towards a finished design with appropriate guidance and support.
               </p>
-            </article>
-
-            <article>
-              <h3>Inclusive by design</h3>
               <p>
-                Accessibility and participation needs are considered
-                when shaping how a person learns, practises, and
-                demonstrates what they can do.
+                This is a starting point for testing the learning experience and improving the
+                approach. It is not a claim that every pathway or support system is already fully
+                established.
               </p>
-            </article>
-
-            <article>
-              <h3>Connected to opportunity</h3>
-              <p>
-                Learning is a step towards practical possibilities,
-                including employment, self-employment, entrepreneurship,
-                freelancing, and further education.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="about-pilot">
-        <div className="about-container about-pilot-inner">
-          <div className="about-pilot-copy">
-            <p className="about-eyebrow">A PRACTICAL START</p>
-            <h2>Learning through meaningful projects.</h2>
-
-            <p>
-              EABD is developing its approach through practical,
-              interest-led learning. The current pilot focuses on a
-              Canva design project, giving a learner the opportunity
-              to work towards a finished design with appropriate
-              guidance and support.
-            </p>
-
-            <p>
-              This is a starting point for testing the learning
-              experience and improving the approach. It is not a
-              claim that every pathway or support system is already
-              fully established.
-            </p>
-
-            <Link to="/explore" className="about-primary-link">
-              View the current pilot
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-          </div>
-
-          <div className="about-pilot-card">
-            <div className="about-pilot-icon" aria-hidden="true">
-              <Lightbulb size={28} />
             </div>
+            <p>
+              <Button to="/explore" iconAfter={<ArrowRight size={18} />}>
+                View the current pilot
+              </Button>
+            </p>
+          </div>
 
-            <p className="about-pilot-label">CURRENT PILOT</p>
-            <h3>Canva Design Project</h3>
-
-            <ul>
+          <aside className="pilot-card" aria-label="Current pilot">
+            <span className="pill pill-waiting">Current pilot</span>
+            <h3 className="pilot-card-title">Canva Design Project</h3>
+            <ul className="pilot-card-list">
               <li>Explore visual design</li>
               <li>Practise using Canva</li>
               <li>Create a useful design</li>
               <li>Review the finished project</li>
             </ul>
-
-            <span className="about-pilot-status">Pilot stage</span>
-          </div>
+            <div className="stat-row">
+              <div className="stat">
+                <span className="stat-value">Four weeks</span>
+                <span className="stat-label">Adjusted to the learner</span>
+              </div>
+              <div className="stat">
+                <span className="stat-value">Reviewed</span>
+                <span className="stat-label">Each step, by a supervisor</span>
+              </div>
+            </div>
+          </aside>
         </div>
-      </section>
+      </Section>
 
-      <section className="about-cta">
-        <div className="about-container">
-          <p className="about-eyebrow">YOUR NEXT STEP</p>
-          <h2>Begin with what matters to you.</h2>
-
-          <p>
-            You do not need to have every step figured out. Start with an
-            interest or goal, and explore what a practical pathway could
-            look like.
-          </p>
-
-          <div className="about-hero-actions">
-            <Link to="/explore" className="about-primary-link">
+      <CallToAction
+        eyebrow="Your next step"
+        title="Begin with what matters to you."
+        lead="You do not need to have every step figured out. Start with an interest or goal, and explore what a practical pathway could look like."
+        actions={
+          <>
+            <Button to="/explore" variant="secondary" iconAfter={<ArrowRight size={18} />}>
               Explore pathways
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-
-            <Link to="/signup" className="about-cta-secondary">
+            </Button>
+            <Button to="/signup" variant="secondary">
               Create an account
-            </Link>
-          </div>
-        </div>
-      </section>
+            </Button>
+          </>
+        }
+      />
     </main>
   );
 }

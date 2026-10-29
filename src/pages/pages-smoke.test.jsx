@@ -176,10 +176,14 @@ describe("public pages render", () => {
     expect(html.match(/<h1/g) ?? []).toHaveLength(1);
   });
 
-  it("renders the about page", async () => {
+  it("renders the about page with one h1", async () => {
     const html = await render(createElement(About));
-    expect(html).toContain("ABOUT EABD");
+    expect(html).toContain("About EABD");
+    expect(html).toContain("Your ability deserves a pathway");
     expect(html.match(/<h1/g) ?? []).toHaveLength(1);
+    // The seven-step process is present.
+    expect(html).toContain("Discover");
+    expect(html).toContain("Connect");
   });
 
   it("renders the pathway catalogue with the pilot pathway", async () => {
