@@ -16,6 +16,7 @@ change.
 flowchart LR
   Learner["Learner or guardian<br/>(browser)"] -->|"HTTPS"| App["React SPA<br/>(Vite build)"]
   Supervisor["Supervisor<br/>(browser)"] -->|"HTTPS"| App
+  Admin["Platform admin<br/>(browser)"] -->|"HTTPS"| App
   App -->|"Auth, PostgREST, Storage<br/>with the user's JWT"| Supabase["Supabase<br/>(Postgres, Auth, Storage)"]
   App -->|"POST /functions/v1/extract-document"| Edge["extract-document<br/>Edge Function"]
   Edge -->|"read the stored file<br/>(service role)"| Storage["Private bucket<br/>learner-documents"]
@@ -33,7 +34,7 @@ proven they own through row level security.
 | --- | --- | --- |
 | Browser application | React 19, React Router 7, Vite 7 | Routing, forms, adaptation of the interface, and all reads and writes that the user's own permissions allow |
 | Authentication | Supabase Auth | Email and password, WebAuthn passkeys, session refresh |
-| Database | Supabase Postgres with row level security | The learner record, progress, reviews, and supervisor assignment |
+| Database | Supabase Postgres with row level security | The learner record, progress, reviews, supervisor assignment, the platform admin role, and the admin audit trail |
 | File storage | Supabase Storage, private bucket | Uploaded documents, deletable on confirmation |
 | Edge Function | Deno on Supabase | Reads one document and returns suggested fields with evidence |
 | Hosting | Vercel (production) or nginx (Docker) | Serves the static bundle and rewrites unknown paths to `index.html` |
@@ -44,7 +45,8 @@ proven they own through row level security.
 flowchart TD
   Main["src/main.jsx<br/>BrowserRouter, AuthProvider, LearnerProvider"] --> App["src/App.jsx<br/>route table"]
   App --> Header["SiteHeader<br/>navigation, display settings, read aloud"]
-  App --> Public["Public pages<br/>Home, About, Explore"]
+  App --> Public["Public pages<br/>Home, About, Explore,<br/>Glossary, Terms, Privacy"]
+  App --> Footer["SiteFooter<br/>public pages only"]
   App --> Auth["SignIn, SignUp"]
   App --> Protected["ProtectedRoute"]
   Protected --> Onboarding["OnboardingFlow<br/>seven steps"]
@@ -55,6 +57,8 @@ flowchart TD
   App --> SupGuard["SupervisorRoute"]
   SupGuard --> SupHome["SupervisorHome"]
   SupGuard --> SupLearner["SupervisorLearner"]
+  App --> AdminGuard["AdminRoute"]
+  AdminGuard --> AdminHome["AdminHome"]
 ```
 
 Three rules hold the structure together:
@@ -62,7 +66,7 @@ Three rules hold the structure together:
 1. **Routes own data loading.** A page asks the data layer for what it needs. There is no
    global store for progress or reviews.
 2. **Contexts own session state.** `AuthContext` owns the session. `LearnerContext` owns
-   the learner record and whether the account is a supervisor.
+   the learner record, the supervisor role, and the platform admin role.
 3. **Shared components own presentation rules.** Field groups, banners, summaries, and
    review cards are mounted by several pages rather than copied.
 
@@ -81,7 +85,8 @@ sequenceDiagram
   A-->>L: user available
   L->>D: getMyLearner()
   L->>D: isSupervisor()
-  D-->>L: learner row and role
+  L->>D: isPlatformAdmin()
+  D-->>L: learner row, supervisor role, and admin role
   L-->>U: record ready, page renders
 ```
 
@@ -97,7 +102,7 @@ sequenceDiagram
   participant L as Learner
   participant J as LearningJourney
   participant P as task_progress
-  participant S as Supervisor
+  participant S as Reviewer
   participant R as task_reviews
   U as Trigger
   L->>J: Start in Canva
@@ -113,7 +118,8 @@ sequenceDiagram
 
 The step status is never written by the learner as `reviewed`. The database policies
 allow a learner to write only `started` and `submitted`, and the review trigger is the only
-writer of `reviewed`.
+writer of `reviewed`. The reviewer in the diagram is either the assigned supervisor or a
+platform admin. Both call `createReview`.
 
 ## Pathway definition
 
@@ -138,5 +144,9 @@ a function edit with a test to match.
 - One pathway is defined. The schema is pathway-agnostic, using `pathway_id` text columns.
 - Document extraction defaults to a fixed sample. Real extraction needs a provider decision
   and a data processing agreement, which is an open decision in the plan.
-- Supervisor accounts are provisioned by SQL. There is no invitation flow.
+- The platform admin role is granted in the SQL editor. An admin can assign an existing
+  supervisor from `/admin`. Removing an assignment, and granting the supervisor role from
+  the page, are not offered yet. There is no invitation flow.
+- Nothing notifies a reviewer when a step is submitted. The supervisor list and the admin
+  queue are checked by opening them.
 - Under-18 self sign-up is an open policy decision; the guardian path exists to cover it.

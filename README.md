@@ -94,6 +94,7 @@ docker compose down
 
 ## Project records
 
+- Change log from 28 October 2026: [CHANGELOG.md](CHANGELOG.md)
 - Current implementation plan: [docs/eae/2026-10-28-learner-record-plan.md](docs/eae/2026-10-28-learner-record-plan.md)
 - Code review and gap analysis: [docs/eae/2026-10-28-code-review.md](docs/eae/2026-10-28-code-review.md)
 

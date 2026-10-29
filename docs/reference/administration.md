@@ -8,7 +8,7 @@ it done or not yet, gives a rating, and writes a comment. That decision is what
 itself is the record.
 
 ```
-learner sends step          supervisor reviews            learner sees result
+learner sends step          a reviewer decides            learner sees result
 task_progress.submitted  ->  task_reviews (append-only) ->  task_progress.reviewed
                              apply_review() trigger         or back to started
 ```
@@ -28,8 +28,8 @@ properties are identical whichever route is used.
 
 ## The admin role
 
-`public.platform_admins` holds the role. It is granted in the SQL editor, never
-from the client, because there is no insert policy for ordinary users.
+`public.platform_admins` holds the role. It is granted in the SQL editor. The table
+has no insert policy, so the client cannot grant it.
 
 ```sql
 insert into public.platform_admins (user_id)
@@ -95,11 +95,13 @@ Researched against learning-platform and approval-workflow guidance:
 
 ## What is deliberately missing
 
-- **No notification.** A supervisor has to open the queue to discover work. The
-  research is unambiguous that this is the first thing to add: an email or in-app
-  notification on submission, then a reminder, then escalation to a backup.
-- **No reassignment UI.** The table and policies support it; the interface does
-  not expose it yet.
+- **No notification.** A reviewer has to open `/supervisor` or `/admin` to discover
+  work. The research is unambiguous that this is the first thing to add: an email or
+  in-app notification on submission, then a reminder, then escalation to a backup.
+- **No removal or role-grant controls on the page.** The Learners tab assigns an
+  existing supervisor. `unassignSupervisor` and `grantSupervisor` exist in
+  `src/lib/db/admin.js`, and the policies allow them, but the page does not call
+  them yet.
 - **No export.** An audit CSV per learner is recommended for compliance and is not
   built.
 - **No bulk approve.** Deliberate. Bulk approval on a record a person has not read

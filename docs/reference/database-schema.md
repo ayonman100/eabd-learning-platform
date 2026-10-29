@@ -181,7 +181,8 @@ One row per learner, pathway, and task. Primary key is the triple.
 
 ## `public.task_reviews`
 
-Append-only supervisor reviews. The newest review for a task is the current one.
+Append-only reviews. An assigned supervisor or a platform admin may insert one, with
+`reviewer_id` equal to themselves. The newest review for a task is the current one.
 
 | Column | Type | Notes |
 | --- | --- | --- |

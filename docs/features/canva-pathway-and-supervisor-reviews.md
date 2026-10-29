@@ -2,8 +2,8 @@
 
 ## What it covers
 
-How a learner moves through the four-week Canva pathway, how a step reaches a supervisor, and
-what a supervisor can record.
+How a learner moves through the four-week Canva pathway, how a step reaches a reviewer, and
+what that reviewer can record. A reviewer is the assigned supervisor, or a platform admin.
 
 ## The pathway
 
@@ -25,10 +25,11 @@ Changing content is a data edit. Progress rows already recorded against a task i
 | --- | --- | --- |
 | `started` | The learner opened the step | Learner |
 | `submitted` | The learner sent it for review | Learner |
-| `reviewed` | A supervisor marked it done | The review trigger only |
+| `reviewed` | A reviewer marked it done | The review trigger only |
 
 The learner's update policy allows only `started` and `submitted`. There is no path by which a
-learner can write `reviewed`, and no client insert policy on `task_reviews` for a non-supervisor.
+learner can write `reviewed`. A `task_reviews` insert requires `reviewer_id` to be the caller,
+and the caller must supervise that learner or hold the platform admin role.
 
 ## Week unlocking
 
@@ -90,9 +91,16 @@ On save, `createReview` inserts a row. The `on_task_review` trigger then sets th
 `reviewed` for "Done" or back to `started` for "Not yet". The learner sees the new status and the
 feedback on the dashboard and on the journey page.
 
+## The administration view
+
+`/admin` is for a member of `public.platform_admins`. It lists every submitted step, oldest
+first, and writes the same `task_reviews` row through `createReview`. The Learners tab can
+assign an existing supervisor. The role, the audit table, and the grant SQL are in
+[administration.md](../reference/administration.md).
+
 ## Why reviews are append-only
 
-A review is a record of what a supervisor said at a moment in time, next to what the learner had
+A review is a record of what a reviewer said at a moment in time, next to what the learner had
 submitted. Editing or deleting one would erase that record. There is therefore no update or
 delete policy on `task_reviews`; a correction is a new review.
 
@@ -106,6 +114,6 @@ Supervisors are created by a person with database access, not by invitation. The
 ## Known limits
 
 - One pathway. The schema is pathway-agnostic but the catalogue holds a single entry.
-- No notification when a step is submitted. A supervisor checks the list.
+- No notification when a step is submitted. A supervisor checks `/supervisor`, and a platform admin checks the queue on `/admin`.
 - No batch review; each task is reviewed on its own.
 - The Canva URL is the generic site until a specific template link is agreed.

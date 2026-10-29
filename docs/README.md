@@ -38,19 +38,21 @@ folder, and cross-links replace duplication.
 - [services-and-contexts.md](reference/services-and-contexts.md) - every module in `src/lib/`, plus `AuthContext` and `LearnerContext`
 - [edge-functions-api.md](reference/edge-functions-api.md) - the `extract-document` HTTP contract
 - [components-and-routes.md](reference/components-and-routes.md) - route table, guards, and the reusable component catalogue
+- [administration.md](reference/administration.md) - the platform admin role, the approval queue, and the audit trail
 
 ## Features
 
 - [authentication-and-passkeys.md](features/authentication-and-passkeys.md) - learner and guardian sign-up, sign-in, and passkeys
 - [onboarding-and-document-extraction.md](features/onboarding-and-document-extraction.md) - the seven-step flow and human confirmation of suggestions
 - [adaptive-dashboard-and-profile.md](features/adaptive-dashboard-and-profile.md) - how the record shapes the screen, and profile editing
-- [canva-pathway-and-supervisor-reviews.md](features/canva-pathway-and-supervisor-reviews.md) - pathway progression, the Canva handoff, and supervisor review
+- [canva-pathway-and-supervisor-reviews.md](features/canva-pathway-and-supervisor-reviews.md) - pathway progression, the Canva handoff, supervisor review, and the admin queue
 
 ## Guides
 
 - [local-development.md](guides/local-development.md) - install, configure, run, and link the Supabase project
 - [testing-and-quality.md](guides/testing-and-quality.md) - lint, unit tests, the RLS check, and the Docker review build
 - [committing.md](guides/committing.md) - commit message shape, and the Husky check that enforces it
+- [enabling-passkeys.md](guides/enabling-passkeys.md) - turn on passkeys for a Supabase project, including the relying party values
 
 ## Operations
 
@@ -60,6 +62,12 @@ folder, and cross-links replace duplication.
 
 - [eae/2026-10-28-learner-record-plan.md](eae/2026-10-28-learner-record-plan.md) - the implementation plan this build follows
 - [eae/2026-10-28-code-review.md](eae/2026-10-28-code-review.md) - the code review and gap analysis
+
+## Change log
+
+[CHANGELOG.md](../CHANGELOG.md) records work from 28 October 2026, beginning with the
+Vercel rewrite that serves every route from `index.html`. Earlier history belongs to
+the platform build that was already in the repository.
 
 ## Conventions used in every document
 
