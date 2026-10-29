@@ -41,3 +41,5 @@ npm run build    # production bundle
 - Accessibility is not optional: keyboard reachability, visible focus, labelled controls, live
   regions for errors, and the target sizes set by the accessibility settings.
 - Update the relevant document under `docs/` when behaviour, schema, or routes change.
+- Write commit messages in the shape documented in `docs/guides/committing.md`. Husky rejects
+  any other shape.

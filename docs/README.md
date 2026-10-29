@@ -50,6 +50,7 @@ folder, and cross-links replace duplication.
 
 - [local-development.md](guides/local-development.md) - install, configure, run, and link the Supabase project
 - [testing-and-quality.md](guides/testing-and-quality.md) - lint, unit tests, the RLS check, and the Docker review build
+- [committing.md](guides/committing.md) - commit message shape, and the Husky check that enforces it
 
 ## Operations
 
