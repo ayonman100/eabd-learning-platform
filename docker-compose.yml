@@ -5,8 +5,9 @@ services:
     build:
       context: .
       args:
-        # Vite inlines these at build time; they come from .env.local so no
-        # publishing step or manual export is needed.
+        # Compose interpolates these from the shell or from --env-file.
+        # It does not read .env.local on its own.
+        #   docker compose --env-file .env.local up --build
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
     ports:

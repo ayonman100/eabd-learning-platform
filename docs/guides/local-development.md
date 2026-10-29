@@ -96,9 +96,10 @@ All three must pass. See [testing-and-quality.md](testing-and-quality.md) for wh
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| "Account services are unavailable" | `.env.local` missing or incomplete | Fill in both values and restart the dev server |
+| "Account services are unavailable" | The bundle was built without `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` | For `npm run dev`, fill in `.env.local` and restart. For Docker, rebuild with `docker compose --env-file .env.local up --build` |
 | Sign-in works but pages stay on the loading text | The learner record query failed | Check the browser console for a safe message and confirm the migration was pushed |
 | "This area is for supervisors" | The account has no `supervisors` row | Run the supervisor SQL |
+| "This area is for the EABD team" | The account has no `platform_admins` row | Run the admin grant SQL |
 | Upload fails with a policy error | The learner id in the path is not one you own | Sign in as the owning account |
 | Document reading says the result was not reliable | The provider returned output that broke the contract | Use the mock provider, or check the function logs |
 | Styles look wrong in dark mode | A hardcoded colour slipped in | Use a token from `src/index.css` |

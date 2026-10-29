@@ -8,11 +8,15 @@ RUN npm ci --no-audit --no-fund
 
 COPY . .
 
-# Vite inlines VITE_* values at build time, so they must exist during the build.
+# Vite inlines VITE_* values at build time. Compose does not read .env.local
+# unless the build is started with --env-file .env.local. An empty value used
+# to produce a running site whose sign-in always said Supabase was missing.
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_PUBLISHABLE_KEY
 ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
 ENV VITE_SUPABASE_PUBLISHABLE_KEY=${VITE_SUPABASE_PUBLISHABLE_KEY}
+
+RUN node -e "if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_PUBLISHABLE_KEY) { console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY.'); console.error('Rebuild with: docker compose --env-file .env.local up --build'); process.exit(1); }"
 
 RUN npm run build
 
