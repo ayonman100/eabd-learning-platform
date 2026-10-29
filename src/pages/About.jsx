@@ -107,7 +107,7 @@ export default function About() {
         }
       />
 
-      <Section tone="surface" labelledBy="principle-heading">
+      <Section tone="violet" labelledBy="principle-heading">
         <SectionHeading
           eyebrow="Our guiding principle"
           title="Disability informs the accommodation. Interest informs the pathway."
@@ -148,7 +148,7 @@ export default function About() {
         </CardGrid>
       </Section>
 
-      <Section tone="surface" labelledBy="principles-heading">
+      <Section tone="teal" labelledBy="principles-heading">
         <SectionHeading
           eyebrow="What guides us"
           title="Inclusion by design. Choice at the centre."

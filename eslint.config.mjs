@@ -50,6 +50,15 @@ export default [
     },
   },
   {
+    // Test files run in Node (or jsdom on top of it) and may read files.
+    files: ["**/*.test.{js,jsx}", "vitest.config.js"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     files: ["scripts/**/*.mjs", "*.config.js", "eslint.config.mjs"],
     languageOptions: {
       globals: {

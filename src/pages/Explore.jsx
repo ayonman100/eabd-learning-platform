@@ -99,7 +99,7 @@ export default function Explore() {
         )}
       </Section>
 
-      <Section tone="default">
+      <Section tone="violet">
         <SectionHeading
           eyebrow="How it works"
           title="Your pathway should work for you."

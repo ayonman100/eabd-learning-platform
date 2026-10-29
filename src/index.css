@@ -9,53 +9,58 @@
   color-scheme: light;
 
   /* ---------------------------------------------------------------------
-     Brand palette, sampled from the EABD logo.
-     Slate blue is the anchor from the wordmark, sage green from "ABILITY",
-     gold from the star, orange from the third figure.
-     Ratios below are contrast against #FFFFFF (WCAG 2.2).
+     Brand palette: the EABD logo hues at Canva-like vibrancy.
+     Every colour below is checked against #FFFFFF for WCAG 2.2:
+       --color-primary        6.23:1  (safe for text and button fills)
+       --color-secondary      6.06:1
+       --color-tertiary       5.02:1
+       Bright decorative shades are separate tokens and are never used for text.
      --------------------------------------------------------------------- */
 
-  /* Primary: slate blue. 4.70:1, so it is safe for text and as a button fill. */
-  --color-primary: #4677a9;
-  --color-primary-strong: #2c5a82; /* 7.26:1, for pressed states and headings */
-  --color-primary-soft: #eaf1f8;
+  /* Primary: the violet from the wheelchair figure, at full vibrancy. */
+  --color-primary: #7d2ae8;
+  --color-primary-strong: #5b21b6;
+  --color-primary-soft: #f3ecfe;
   --color-primary-contrast: #ffffff;
 
-  /* Secondary: sage green. Darkened from logo #6AA86A to #528152 for 4.54:1. */
-  --color-secondary: #528152;
-  --color-secondary-strong: #3f6540;
-  --color-secondary-soft: #edf4ec;
+  /* Secondary: a deep teal that stays readable, with a bright decorative twin. */
+  --color-secondary: #0b7d74;
+  --color-secondary-strong: #076a62;
+  --color-secondary-soft: #e4f7f5;
   --color-secondary-contrast: #ffffff;
+  --color-secondary-bright: #00c4cc;
 
-  /* Tertiary: warm gold and orange, for progress and celebration only.
-     Never used for body text; the logo shades fail contrast. */
-  --color-tertiary: #986e1d; /* 4.58:1 if ever used for text */
-  --color-tertiary-bright: #f2ae2e;
-  --color-tertiary-soft: #fdf4e3;
-  --color-accent-orange: #a9651b; /* 4.60:1 */
-  --color-accent-orange-bright: #f99528;
-  --color-violet: #7b5ea7; /* wheelchair figure hue, darkened for text use */
+  /* Tertiary: warm amber from the star. Deep enough for text, bright for fills. */
+  --color-tertiary: #b45309;
+  --color-tertiary-soft: #fdf1e0;
+  --color-tertiary-bright: #ffb020;
 
-  --color-background: #f7f8fa;
+  --color-accent-orange: #c2410c;
+  --color-accent-orange-soft: #feede4;
+  --color-accent-orange-bright: #ff7a45;
+  --color-violet: #7d2ae8;
+  --color-violet-soft: #f3ecfe;
+
+  --color-background: #fbf9ff;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-text: #16202b; /* 16.46:1 */
-  --color-muted: #5c6b7a; /* 5.9:1, dark enough for small text */
-  --color-border: #e3e7ed;
-  --color-border-strong: #c9d2dc;
-  --color-hover: #eef2f6;
-  --color-focus: #4677a9;
+  --color-text: #17111f; /* 17.6:1 */
+  --color-muted: #5b5470; /* 7.0:1, comfortable for small text */
+  --color-border: #e8e3f2;
+  --color-border-strong: #cfc6e0;
+  --color-hover: #f4f0fb;
+  --color-focus: #7d2ae8;
 
-  /* Semantic status colours, so banners and steps read in every theme */
-  --color-success-border: #528152;
-  --color-success-surface: #edf4ec;
-  --color-success-text: #33532f;
-  --color-warning-border: #986e1d;
-  --color-warning-surface: #fdf4e3;
-  --color-warning-text: #6d4d10;
-  --color-danger-border: #b3261e;
-  --color-danger-surface: #fdecea;
-  --color-danger-text: #8c1d18;
+  /* Semantic status colours */
+  --color-success-border: #0b7d74;
+  --color-success-surface: #e4f7f5;
+  --color-success-text: #075e57;
+  --color-warning-border: #b45309;
+  --color-warning-surface: #fdf1e0;
+  --color-warning-text: #8a3f07;
+  --color-danger-border: #be123c;
+  --color-danger-surface: #ffe9ee;
+  --color-danger-text: #9f1239;
 
   /* Shape and spacing, so no component invents its own scale. */
   --radius-control: 10px;
@@ -72,8 +77,28 @@
   --space-7: 34px;
   --space-8: 44px;
 
-  --shadow-card: 0 1px 2px rgba(22, 32, 43, 0.06), 0 8px 24px rgba(22, 32, 43, 0.06);
-  --shadow-raised: 0 2px 6px rgba(22, 32, 43, 0.08), 0 16px 40px rgba(22, 32, 43, 0.12);
+  --shadow-card: 0 1px 2px rgba(23, 17, 31, 0.05), 0 10px 28px rgba(23, 17, 31, 0.07);
+  --shadow-raised: 0 2px 8px rgba(23, 17, 31, 0.08), 0 18px 44px rgba(23, 17, 31, 0.14);
+
+  /* Hero on a photograph. Overridden in each theme so contrast can be forced. */
+  --hero-text: #ffffff;
+  --hero-text-muted: #efe9fb;
+  --hero-eyebrow: #e9d5ff;
+  --hero-accent: #7ff0e8;
+  --hero-scrim-strong: rgba(28, 12, 48, 0.94);
+  --hero-scrim-mid: rgba(28, 12, 48, 0.82);
+  --hero-scrim-soft: rgba(28, 12, 48, 0.42);
+  --hero-button-bg: #ffffff;
+  --hero-button-text: #5b21b6;
+  --hero-button-border: #ffffff;
+  --hero-ghost-bg: rgba(255, 255, 255, 0.1);
+  --hero-ghost-border: rgba(255, 255, 255, 0.6);
+  --hero-ghost-hover: rgba(255, 255, 255, 0.2);
+
+  /* Vibrant tints for section bands and decorative surfaces. */
+  --tint-violet: #f6efff;
+  --tint-teal: #e6faf8;
+  --tint-amber: #fff6e6;
 
   --content-width: 68rem;
   --content-width-narrow: 40rem;
@@ -85,73 +110,99 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --color-primary: #8ab4de;
-  --color-primary-strong: #b3d0ee;
-  --color-primary-soft: #1b2b3d;
-  --color-primary-contrast: #0b1521;
+  --color-primary: #b18cff;
+  --color-primary-strong: #d3bcff;
+  --color-primary-soft: #241a38;
+  --color-primary-contrast: #14081f;
 
-  --color-secondary: #9ec99c;
-  --color-secondary-strong: #bfdcbd;
-  --color-secondary-soft: #1a2a1c;
-  --color-secondary-contrast: #0b1521;
+  --color-secondary: #5eead4;
+  --color-secondary-strong: #99f6e4;
+  --color-secondary-soft: #10241f;
+  --color-secondary-contrast: #06201c;
+  --color-secondary-bright: #2dd4bf;
 
-  --color-tertiary: #e5bd6d;
-  --color-tertiary-bright: #f2ae2e;
-  --color-tertiary-soft: #2b2314;
-  --color-accent-orange: #edb27a;
-  --color-accent-orange-bright: #f99528;
-  --color-violet: #bda6dd;
+  --color-tertiary: #fbbf24;
+  --color-tertiary-soft: #2b2011;
+  --color-tertiary-bright: #fcd34d;
 
-  --color-background: #0d141c;
-  --color-surface: #141d27;
-  --color-surface-raised: #1a2530;
-  --color-text: #f2f5f8;
-  --color-muted: #aab8c6;
-  --color-border: #2a3742;
-  --color-border-strong: #3c4b58;
-  --color-hover: #1d2a35;
-  --color-focus: #8ab4de;
+  --color-accent-orange: #fdba74;
+  --color-accent-orange-soft: #2c1a10;
+  --color-accent-orange-bright: #ff9a63;
+  --color-violet: #b18cff;
+  --color-violet-soft: #241a38;
 
-  --color-success-border: #4d7a4d;
-  --color-success-surface: #14251a;
-  --color-success-text: #b9dcb6;
-  --color-warning-border: #7a5a18;
-  --color-warning-surface: #241d0e;
-  --color-warning-text: #f0d49a;
-  --color-danger-border: #8c3a34;
-  --color-danger-surface: #2a1614;
-  --color-danger-text: #f4b9b4;
+  --color-background: #100a19;
+  --color-surface: #191224;
+  --color-surface-raised: #221a2f;
+  --color-text: #f7f3ff;
+  --color-muted: #b8afc9;
+  --color-border: #322743;
+  --color-border-strong: #483a5d;
+  --color-hover: #241a33;
+  --color-focus: #b18cff;
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --color-success-border: #3d8f86;
+  --color-success-surface: #0e2321;
+  --color-success-text: #a7f3ea;
+  --color-warning-border: #8a5a10;
+  --color-warning-surface: #261c0d;
+  --color-warning-text: #fbd98a;
+  --color-danger-border: #9f3450;
+  --color-danger-surface: #2a1219;
+  --color-danger-text: #fda4b4;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 28px rgba(0, 0, 0, 0.4);
+  --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.55), 0 18px 44px rgba(0, 0, 0, 0.5);
+
+  --hero-text: #ffffff;
+  --hero-text-muted: #e6dcf7;
+  --hero-eyebrow: #e9d5ff;
+  --hero-accent: #7ff0e8;
+  --hero-scrim-strong: rgba(8, 4, 14, 0.96);
+  --hero-scrim-mid: rgba(8, 4, 14, 0.88);
+  --hero-scrim-soft: rgba(8, 4, 14, 0.55);
+  --hero-button-bg: #ffffff;
+  --hero-button-text: #3b1478;
+  --hero-button-border: #ffffff;
+  --hero-ghost-bg: rgba(255, 255, 255, 0.12);
+  --hero-ghost-border: rgba(255, 255, 255, 0.65);
+  --hero-ghost-hover: rgba(255, 255, 255, 0.22);
+
+  --tint-violet: #1d1430;
+  --tint-teal: #0d211f;
+  --tint-amber: #241b0e;
 }
 
 :root.a11y-high-contrast {
-  --color-primary: #1b4a75;
-  --color-primary-strong: #0d2c48;
+  --color-primary: #4c1d95;
+  --color-primary-strong: #2e1065;
   --color-primary-soft: #ffffff;
   --color-primary-contrast: #ffffff;
 
-  --color-secondary: #2f5b2f;
-  --color-secondary-strong: #1d3d1d;
+  --color-secondary: #045d56;
+  --color-secondary-strong: #033f3a;
   --color-secondary-soft: #ffffff;
   --color-secondary-contrast: #ffffff;
+  --color-secondary-bright: #045d56;
 
-  --color-tertiary: #6b4c05;
-  --color-tertiary-bright: #6b4c05;
+  --color-tertiary: #7a3a00;
   --color-tertiary-soft: #ffffff;
-  --color-accent-orange: #7a4708;
-  --color-accent-orange-bright: #7a4708;
-  --color-violet: #4b3a68;
+  --color-tertiary-bright: #7a3a00;
+
+  --color-accent-orange: #7a2e00;
+  --color-accent-orange-soft: #ffffff;
+  --color-accent-orange-bright: #7a2e00;
+  --color-violet: #4c1d95;
+  --color-violet-soft: #ffffff;
 
   --color-background: #ffffff;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
   --color-text: #000000;
-  --color-muted: #292929;
+  --color-muted: #1f1f1f;
   --color-border: #000000;
   --color-border-strong: #000000;
-  --color-hover: #e5e5e5;
+  --color-hover: #ececec;
   --color-focus: #000000;
 
   --color-success-border: #000000;
@@ -166,34 +217,58 @@
 
   --shadow-card: none;
   --shadow-raised: none;
+
+  /* High contrast over a photograph: hide the film and the scrim entirely,
+     then put plain black on white. Nothing sits over an image. */
+  --hero-text: #000000;
+  --hero-text-muted: #000000;
+  --hero-eyebrow: #000000;
+  --hero-accent: #000000;
+  --hero-scrim-strong: #ffffff;
+  --hero-scrim-mid: #ffffff;
+  --hero-scrim-soft: #ffffff;
+  --hero-button-bg: #000000;
+  --hero-button-text: #ffffff;
+  --hero-button-border: #000000;
+  --hero-ghost-bg: #ffffff;
+  --hero-ghost-border: #000000;
+  --hero-ghost-hover: #ffffff;
+
+  --tint-violet: #ffffff;
+  --tint-teal: #ffffff;
+  --tint-amber: #ffffff;
 }
 
 :root[data-theme="dark"].a11y-high-contrast {
-  --color-primary: #a8d1ff;
-  --color-primary-strong: #cfe6ff;
+  --color-primary: #d8b4fe;
+  --color-primary-strong: #ede9fe;
   --color-primary-soft: #000000;
   --color-primary-contrast: #000000;
 
-  --color-secondary: #b6e3b4;
-  --color-secondary-strong: #d3f2d1;
+  --color-secondary: #7ff0e8;
+  --color-secondary-strong: #b6fff9;
   --color-secondary-soft: #000000;
   --color-secondary-contrast: #000000;
+  --color-secondary-bright: #7ff0e8;
 
-  --color-tertiary: #ffe08a;
-  --color-tertiary-bright: #ffe08a;
+  --color-tertiary: #ffd166;
   --color-tertiary-soft: #000000;
-  --color-accent-orange: #ffc48a;
-  --color-accent-orange-bright: #ffc48a;
-  --color-violet: #d8c4ff;
+  --color-tertiary-bright: #ffd166;
+
+  --color-accent-orange: #ffb27a;
+  --color-accent-orange-soft: #000000;
+  --color-accent-orange-bright: #ffb27a;
+  --color-violet: #d8b4fe;
+  --color-violet-soft: #000000;
 
   --color-background: #000000;
-  --color-surface: #080808;
-  --color-surface-raised: #080808;
+  --color-surface: #000000;
+  --color-surface-raised: #000000;
   --color-text: #ffffff;
-  --color-muted: #eeeeee;
+  --color-muted: #f2f2f2;
   --color-border: #ffffff;
   --color-border-strong: #ffffff;
-  --color-hover: #252525;
+  --color-hover: #262626;
   --color-focus: #ffff00;
 
   --color-success-border: #ffffff;
@@ -205,6 +280,24 @@
   --color-danger-border: #ffffff;
   --color-danger-surface: #000000;
   --color-danger-text: #ffffff;
+
+  --hero-text: #ffffff;
+  --hero-text-muted: #ffffff;
+  --hero-eyebrow: #ffffff;
+  --hero-accent: #ffff00;
+  --hero-scrim-strong: #000000;
+  --hero-scrim-mid: #000000;
+  --hero-scrim-soft: #000000;
+  --hero-button-bg: #ffff00;
+  --hero-button-text: #000000;
+  --hero-button-border: #ffff00;
+  --hero-ghost-bg: #000000;
+  --hero-ghost-border: #ffffff;
+  --hero-ghost-hover: #000000;
+
+  --tint-violet: #000000;
+  --tint-teal: #000000;
+  --tint-amber: #000000;
 }
 
 * {
@@ -266,7 +359,7 @@ a {
 
 ::selection {
   background: var(--color-secondary);
-  color: #ffffff;
+  color: var(--color-secondary-contrast);
 }
 
 /* Accessibility: text size */
@@ -320,9 +413,7 @@ a {
   display: grid;
   place-items: center;
   padding: 3rem 1.25rem;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(13, 148, 136, 0.10), transparent 32%),
-    var(--color-background);
+  background: var(--color-background);
 }
 
 .auth-card {
@@ -333,7 +424,7 @@ a {
   border-radius: 1.25rem;
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .auth-eyebrow {
@@ -490,7 +581,7 @@ a {
   border: 0;
   border-radius: 0.7rem;
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-primary-contrast);
   font-weight: 750;
   cursor: pointer;
   transition: opacity 160ms ease, transform 160ms ease;
@@ -721,9 +812,9 @@ a {
 .learning-progress-card,
 .learning-week {
   padding: clamp(1rem, 3vw, 1.6rem);
-  border: 1px solid var(--color-border, #d6dce3);
+  border: 1px solid var(--color-border);
   border-radius: 1rem;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
 }
 
 .learning-progress-card {
@@ -752,7 +843,7 @@ a {
   width: 100%;
   height: 1rem;
   margin: 1.2rem 0 0.6rem;
-  accent-color: var(--color-primary, #315f45);
+  accent-color: var(--color-primary);
 }
 
 .learning-progress-count,
@@ -844,7 +935,7 @@ a {
   display: grid;
   gap: 0.6rem;
   padding: 1rem 0;
-  border-top: 1px solid var(--color-border, #d6dce3);
+  border-top: 1px solid var(--color-border);
 }
 
 .learning-task-checkbox {
@@ -859,7 +950,7 @@ a {
   width: 1.2rem;
   height: 1.2rem;
   margin-top: 0.2rem;
-  accent-color: var(--color-primary, #315f45);
+  accent-color: var(--color-primary);
 }
 
 .learning-task-checkbox input:disabled {
@@ -895,7 +986,7 @@ a {
   width: fit-content;
   min-height: 2.75rem;
   padding: 0.6rem 0.8rem;
-  border: 1px solid var(--color-border, #aab2bd);
+  border: 1px solid var(--color-border);
   border-radius: 0.55rem;
   background: transparent;
   color: inherit;
@@ -919,7 +1010,7 @@ a {
   align-items: start;
   gap: 0.6rem;
   padding: 0.9rem;
-  border: 1px solid #c28a3b;
+  border: 1px solid var(--color-warning-border);
   border-radius: 0.7rem;
 }
 
@@ -939,7 +1030,7 @@ a {
 
 .learning-locked-message {
   margin-bottom: 1rem;
-  border: 1px solid var(--color-border, #d6dce3);
+  border: 1px solid var(--color-border);
 }
 
 .learning-week-complete {
@@ -1971,7 +2062,7 @@ a {
 .btn-danger {
   background: var(--color-danger-text);
   border-color: var(--color-danger-text);
-  color: #ffffff;
+  color: var(--color-danger-surface);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -2850,8 +2941,7 @@ a {
 }
 
 .hero-brand {
-  background:
-    linear-gradient(180deg, var(--color-primary-soft) 0%, var(--color-background) 100%);
+  background: linear-gradient(180deg, var(--tint-violet) 0%, var(--color-background) 100%);
 }
 
 .hero-inner {
@@ -2918,6 +3008,18 @@ a {
 
 .section-default {
   background: var(--color-background);
+}
+
+.section-violet {
+  background: var(--tint-violet);
+}
+
+.section-teal {
+  background: var(--tint-teal);
+}
+
+.section-amber {
+  background: var(--tint-amber);
 }
 
 .section-surface {
@@ -2999,6 +3101,12 @@ a {
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.feature-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-raised);
 }
 
 .feature-card-top {
@@ -3013,11 +3121,11 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-control);
   background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
+  color: var(--color-primary);
 }
 
 .feature-card-number {
@@ -3103,7 +3211,7 @@ a {
 }
 
 .section-brand .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--color-primary-strong);
   color: var(--color-primary-contrast);
 }
 
@@ -3417,6 +3525,8 @@ a {
 
 /* ---------------------------------------------------------------------------
    Home hero: full-bleed film with a readable scrim.
+   Every colour here is a token, so light, dark, and both high contrast themes
+   each decide for themselves what sits over the film.
    --------------------------------------------------------------------------- */
 
 .home-hero {
@@ -3427,8 +3537,8 @@ a {
   padding: var(--space-8) var(--space-4);
   overflow: hidden;
   isolation: isolate;
-  background: var(--color-ink, #101a24);
-  color: #ffffff;
+  background: var(--hero-scrim-strong);
+  color: var(--hero-text);
 }
 
 .home-hero-video,
@@ -3445,17 +3555,24 @@ a {
   object-position: center;
 }
 
-/* Two stops of scrim: a solid left edge for text, a softer right for the film. */
 .home-hero-scrim {
   z-index: 1;
-  background:
-    linear-gradient(
-      100deg,
-      rgba(16, 26, 36, 0.94) 0%,
-      rgba(16, 26, 36, 0.82) 46%,
-      rgba(16, 26, 36, 0.42) 100%
-    );
+  background: linear-gradient(
+    100deg,
+    var(--hero-scrim-strong) 0%,
+    var(--hero-scrim-mid) 46%,
+    var(--hero-scrim-soft) 100%
+  );
   pointer-events: none;
+}
+
+/* High contrast must not put text over a moving photograph. */
+:root.a11y-high-contrast .home-hero-video {
+  display: none;
+}
+
+:root.a11y-high-contrast .home-hero-scrim {
+  background: var(--hero-scrim-strong);
 }
 
 .home-hero-inner {
@@ -3471,7 +3588,7 @@ a {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #d9c9f5;
+  color: var(--hero-eyebrow);
 }
 
 .home-hero-title {
@@ -3481,11 +3598,11 @@ a {
   font-weight: 800;
   line-height: 1.06;
   letter-spacing: -0.04em;
-  color: #ffffff;
+  color: var(--hero-text);
 }
 
 .home-hero-title span {
-  color: #a9d3a7;
+  color: var(--hero-accent);
 }
 
 .home-hero-lead {
@@ -3493,7 +3610,7 @@ a {
   max-width: 40rem;
   font-size: clamp(1rem, 1.7vw, 1.15rem);
   line-height: 1.7;
-  color: #e3ebf2;
+  color: var(--hero-text-muted);
 }
 
 .home-hero-actions {
@@ -3503,28 +3620,30 @@ a {
   margin-top: var(--space-6);
 }
 
-/* On the dark hero both buttons need their own treatment. */
+/* On the hero both buttons take their colours from the theme, not from .btn. */
 .home-hero .btn-primary {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: var(--color-primary-strong);
+  background: var(--hero-button-bg);
+  border-color: var(--hero-button-border);
+  color: var(--hero-button-text);
 }
 
 .home-hero .btn-primary:hover:not(:disabled) {
-  background: #eaf1f8;
-  border-color: #eaf1f8;
+  background: var(--hero-button-bg);
+  border-color: var(--hero-button-border);
+  color: var(--hero-button-text);
+  opacity: 0.9;
 }
 
 .home-hero .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.55);
-  color: #ffffff;
+  background: var(--hero-ghost-bg);
+  border-color: var(--hero-ghost-border);
+  color: var(--hero-text);
 }
 
 .home-hero .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: #ffffff;
-  color: #ffffff;
+  background: var(--hero-ghost-hover);
+  border-color: var(--hero-text);
+  color: var(--hero-text);
 }
 
 .home-hero-note {
@@ -3532,7 +3651,7 @@ a {
   max-width: 38rem;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: #c4d2de;
+  color: var(--hero-text-muted);
 }
 
 .hero > .home-hero-inner,

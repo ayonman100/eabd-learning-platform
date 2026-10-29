@@ -138,7 +138,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Section tone="surface" labelledBy="intro-heading">
+      <Section tone="violet" labelledBy="intro-heading">
         <div className="two-column">
           <div>
             <SectionHeading
@@ -192,7 +192,7 @@ export default function Home() {
         </p>
       </Section>
 
-      <Section tone="surface" labelledBy="included-heading">
+      <Section tone="teal" labelledBy="included-heading">
         <SectionHeading
           eyebrow="Built in, not bolted on"
           title="Adjustments are part of the design."

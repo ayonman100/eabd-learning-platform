@@ -4,7 +4,6 @@ import {
   Accessibility,
   ChevronDown,
   ClipboardCheck,
-  Contrast,
   LayoutGrid,
   LogOut,
   Menu,
@@ -121,11 +120,9 @@ export default function SiteHeader() {
       root.classList.add(className);
     }
 
-    root.dataset.theme = settings.highContrast
-      ? "light"
-      : overrides.darkMode
-        ? "dark"
-        : "light";
+    // Dark and high contrast are independent: a person can want both. Forcing
+    // "light" here whenever contrast was on is what made the toggle appear dead.
+    root.dataset.theme = overrides.darkMode ? "dark" : "light";
   }, [settings, overrides.darkMode]);
 
   useEffect(() => {
@@ -190,7 +187,9 @@ export default function SiteHeader() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [panelOpen, learningMenuOpen, menuOpen]);
 
-  // A click outside the grouped menu closes it, as a menu should.
+  // Only one surface is open at a time. Closing the other inside the click
+  // handler keeps the state change in one place instead of two effects that
+  // would otherwise fight each other.
   useEffect(() => {
     if (!learningMenuOpen) return undefined;
 
@@ -203,6 +202,24 @@ export default function SiteHeader() {
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [learningMenuOpen]);
+
+  // A click outside the display panel closes it, except on its own trigger,
+  // which toggles the panel itself.
+  useEffect(() => {
+    if (!panelOpen) return undefined;
+
+    function handlePointerDown(event) {
+      const panel = panelRef.current;
+      const trigger = toggleRef.current;
+      if (!panel) return;
+      if (panel.contains(event.target)) return;
+      if (trigger?.contains(event.target)) return;
+      setPanelOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [panelOpen]);
 
   const stopReading = useCallback(() => {
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -397,7 +414,10 @@ export default function SiteHeader() {
                 aria-expanded={learningMenuOpen}
                 aria-controls="learning-menu-panel"
                 aria-haspopup="true"
-                onClick={() => setLearningMenuOpen((open) => !open)}
+                onClick={() => {
+                  setPanelOpen(false);
+                  setLearningMenuOpen((open) => !open);
+                }}
               >
                 <LayoutGrid size={18} aria-hidden="true" />
                 <span className="learning-menu-label">My learning</span>
@@ -460,7 +480,10 @@ export default function SiteHeader() {
             aria-label="Accessibility and display settings"
             aria-expanded={panelOpen}
             aria-controls="accessibility-panel"
-            onClick={() => setPanelOpen((open) => !open)}
+            onClick={() => {
+              setLearningMenuOpen(false);
+              setPanelOpen((open) => !open);
+            }}
           >
             <Accessibility size={20} aria-hidden="true" />
             <span className="tool-label">Display</span>
@@ -496,14 +519,25 @@ export default function SiteHeader() {
       </div>
 
       {panelOpen && (
-        <section
+        <div
           id="accessibility-panel"
-          className="accessibility-panel"
-          aria-label="Accessibility and display settings"
+          className="display-panel"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="display-panel-heading"
           ref={panelRef}
         >
-          <div className="accessibility-panel-heading">
-            <h2>Display settings</h2>
+          <div className="display-panel-head">
+            <div className="display-panel-title">
+              <span className="display-panel-icon" aria-hidden="true">
+                <Accessibility size={18} />
+              </span>
+              <div>
+                <h2 id="display-panel-heading">Display settings</h2>
+                <p className="display-panel-sub">Saved as you change them</p>
+              </div>
+            </div>
+
             <button
               type="button"
               className="panel-close"
@@ -513,102 +547,122 @@ export default function SiteHeader() {
                 toggleRef.current?.focus();
               }}
             >
-              <X size={19} aria-hidden="true" />
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
 
-          <DisplaySettingsFields
-            value={settings}
-            onChange={(next) => {
-              // Persist only the keys the person actually changed.
-              const changed = {};
-              for (const key of Object.keys(DEFAULT_SETTINGS)) {
-                if (next[key] !== settings[key]) changed[key] = next[key];
-              }
-              updateSettings(changed);
-            }}
-            idPrefix="header-display"
-          />
+          <div className="display-panel-body">
+            <DisplaySettingsFields
+              value={settings}
+              onChange={(next) => {
+                // Persist only the keys the person actually changed.
+                const changed = {};
+                for (const key of Object.keys(DEFAULT_SETTINGS)) {
+                  if (next[key] !== settings[key]) changed[key] = next[key];
+                }
+                updateSettings(changed);
+              }}
+              idPrefix="header-display"
+            />
 
-          <div className="accessibility-extra">
-            <button
-              type="button"
-              className="accessibility-option"
-              aria-pressed={overrides.darkMode}
-              onClick={() => updateSettings({ darkMode: !overrides.darkMode })}
-            >
-              <Contrast size={20} aria-hidden="true" />
-              <span>{overrides.darkMode ? "Use light colours" : "Use dark colours"}</span>
-            </button>
-
-            <p className="accessibility-section-label">Read page aloud</p>
-
-            <div className="reading-controls">
-              <button
-                type="button"
-                className="accessibility-option"
-                aria-pressed={speaking}
-                onClick={toggleReading}
-              >
-                {speaking ? (
-                  <VolumeX size={20} aria-hidden="true" />
-                ) : (
-                  <Volume2 size={20} aria-hidden="true" />
-                )}
-                <span>{speaking ? "Stop reading" : "Read page aloud"}</span>
-              </button>
-
-              {speaking && (
+            <fieldset className="choice-group">
+              <legend className="choice-legend">Colour scheme</legend>
+              <div className="segmented-options" role="radiogroup" aria-label="Colour scheme">
                 <button
                   type="button"
-                  className="accessibility-option"
-                  onClick={togglePause}
-                  aria-label={paused ? "Resume reading" : "Pause reading"}
+                  role="radio"
+                  aria-checked={!overrides.darkMode}
+                  className="segmented-option"
+                  onClick={() => updateSettings({ darkMode: false })}
                 >
-                  {paused ? (
-                    <Play size={20} aria-hidden="true" />
-                  ) : (
-                    <Pause size={20} aria-hidden="true" />
-                  )}
-                  <span>{paused ? "Resume reading" : "Pause reading"}</span>
+                  {!overrides.darkMode && <Sun size={15} aria-hidden="true" />}
+                  Light colours
                 </button>
-              )}
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={Boolean(overrides.darkMode)}
+                  className="segmented-option"
+                  onClick={() => updateSettings({ darkMode: true })}
+                >
+                  {overrides.darkMode && <Moon size={15} aria-hidden="true" />}
+                  Dark colours
+                </button>
+              </div>
+            </fieldset>
+
+            <fieldset className="choice-group">
+              <legend className="choice-legend">Read page aloud</legend>
+              <p className="choice-hint">
+                Uses your device voice. Reading speed is {Number(overrides.readingRate).toFixed(1)}x.
+              </p>
+
+              <div className="reading-controls">
+                <button
+                  type="button"
+                  className="reading-toggle"
+                  aria-pressed={speaking}
+                  onClick={toggleReading}
+                >
+                  {speaking ? (
+                    <VolumeX size={18} aria-hidden="true" />
+                  ) : (
+                    <Volume2 size={18} aria-hidden="true" />
+                  )}
+                  {speaking ? "Stop reading" : "Read page aloud"}
+                </button>
+
+                {speaking && (
+                  <button
+                    type="button"
+                    className="reading-toggle"
+                    onClick={togglePause}
+                    aria-label={paused ? "Resume reading" : "Pause reading"}
+                  >
+                    {paused ? (
+                      <Play size={18} aria-hidden="true" />
+                    ) : (
+                      <Pause size={18} aria-hidden="true" />
+                    )}
+                    {paused ? "Resume" : "Pause"}
+                  </button>
+                )}
+              </div>
+
+              <label className="reading-speed" htmlFor="reading-rate">
+                <span className="reading-speed-label">Speed</span>
+                <input
+                  id="reading-rate"
+                  type="range"
+                  min="0.5"
+                  max="1.5"
+                  step="0.1"
+                  value={overrides.readingRate}
+                  onChange={(event) =>
+                    updateSettings({ readingRate: Number(event.target.value) })
+                  }
+                />
+                <span className="reading-speed-ends">
+                  <span>Slower</span>
+                  <span>Faster</span>
+                </span>
+              </label>
+            </fieldset>
+
+            <div className="display-panel-foot">
+              <button
+                type="button"
+                className="btn btn-quiet"
+                onClick={resetSettings}
+              >
+                Reset all
+              </button>
+              <p className="display-panel-note">
+                Saved on this device, and on your record when you are signed in.
+              </p>
             </div>
-
-            <label className="reading-speed-control" htmlFor="reading-rate">
-              Reading speed: {Number(overrides.readingRate).toFixed(1)}x
-              <input
-                id="reading-rate"
-                type="range"
-                min="0.5"
-                max="1.5"
-                step="0.1"
-                value={overrides.readingRate}
-                onChange={(event) =>
-                  updateSettings({ readingRate: Number(event.target.value) })
-                }
-              />
-              <span className="reading-speed-labels">
-                <span>Slower</span>
-                <span>Faster</span>
-              </span>
-            </label>
-
-            <button
-              type="button"
-              className="accessibility-option reset-option"
-              onClick={resetSettings}
-            >
-              Reset all settings
-            </button>
-
-            <p className="accessibility-help">
-              Your choices are saved on this device, and on your record when you
-              are signed in. Your device's screen reader can provide additional
-              assistance.
-            </p>
           </div>
-        </section>
+        </div>
       )}
     </header>
   );
