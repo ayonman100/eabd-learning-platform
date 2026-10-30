@@ -192,7 +192,7 @@ describe("public pages render", () => {
 
   it("renders the pathway catalogue with the pilot pathway", async () => {
     const html = await render(createElement(Explore));
-    expect(html).toContain("Canva Design Project");
+    expect(html).toContain("Graphic Design: Creating a Promotional Flyer");
     expect(html).toContain("Pilot");
   });
 
@@ -236,7 +236,7 @@ describe("learner pages render", () => {
   it("renders the dashboard with progress and the pathway", async () => {
     const html = await render(createElement(Dashboard), "/dashboard");
     expect(html).toContain("Welcome, Chinedu.");
-    expect(html).toContain("Canva Design Project");
+    expect(html).toContain("Graphic Design: Creating a Promotional Flyer");
     expect(html).toContain("/profile");
   });
 
