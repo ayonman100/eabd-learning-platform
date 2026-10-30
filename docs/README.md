@@ -56,7 +56,7 @@ folder, and cross-links replace duplication.
 
 ## Operations
 
-- [production-rollout.md](operations/production-rollout.md) - production checklist for Supabase and Vercel
+- [production-rollout.md](operations/production-rollout.md) - live release runbook: a new Supabase project, the migrations, and the Vercel build
 
 ## Programme records
 

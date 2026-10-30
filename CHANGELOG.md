@@ -5,6 +5,15 @@ is `bc7f2cc`. History before that commit is the earlier platform build.
 
 Entries are grouped by commit date, newest first. There is no version number yet.
 
+## 30 October 2026
+
+### Documentation
+
+- The live release runbook tells the deploying developer to create their own Supabase
+  project, apply the three migrations, and point the Vercel build at that project.
+  The test project is not the live database. `config.toml` stays a localhost file
+  and is not pushed to production.
+
 ## 29 October 2026
 
 ### Added

@@ -44,11 +44,14 @@ npx supabase link --project-ref <project-ref>
 npx supabase db push
 ```
 
-`supabase/config.toml` sets the local ports and the development site URL. The migration in
-`supabase/migrations/` is the single source of truth for the schema.
+`supabase/config.toml` sets the local ports and the development site URL. The files in
+`supabase/migrations/` are the source of truth for the schema.
 
-To apply the migration to a fresh project, `db push` is enough. It creates the tables, the
+To apply them to a fresh project, `db push` is enough. It creates the tables, the
 policies, the triggers, and the private storage bucket.
+
+A live deploy uses a new Supabase project and the public site, not this machine's
+`.env.local`. Follow [the live release runbook](../operations/production-rollout.md).
 
 ## Edge Function
 
